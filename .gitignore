@@ -38,3 +38,4 @@ backend/data/
 
 # Electron
 out/
+deploy-edge.js
