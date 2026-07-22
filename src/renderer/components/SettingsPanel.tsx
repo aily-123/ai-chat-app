@@ -187,34 +187,34 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
       >
         {/* 左侧导航 */}
         <div
-          className="w-60 hairline-r flex flex-col"
+          className="w-full md:w-60 hairline-b md:hairline-r md:hairline-b-0 flex flex-col overflow-x-auto md:overflow-x-visible"
           style={{ background: 'var(--surface)' }}
         >
           {/* Masthead */}
-          <div className="px-6 pt-6 pb-5 hairline-b">
-            <div className="flex items-start justify-between mb-3">
+          <div className="px-4 md:px-6 pt-4 md:pt-6 pb-4 md:pb-5 hairline-b flex-shrink-0">
+            <div className="flex items-start justify-between mb-2 md:mb-3">
               <div>
-                <div className="eyebrow eyebrow-accent mb-1.5">Preferences</div>
-                <h2 className="font-display text-[24px] leading-[1.05] font-light tracking-[-0.025em]" style={{ color: 'var(--ink)' }}>
+                <div className="eyebrow eyebrow-accent mb-1 md:mb-1.5">Preferences</div>
+                <h2 className="font-display text-[20px] md:text-[24px] leading-[1.05] font-light tracking-[-0.025em]" style={{ color: 'var(--ink)' }}>
                   设<em className="italic font-extralight" style={{ color: 'var(--accent)' }}>置</em>
                 </h2>
               </div>
-              <span className="numeric-badge mt-1">05</span>
+              <span className="numeric-badge mt-1 hidden md:block">05</span>
             </div>
-            <p className="text-[11.5px] leading-[1.65]" style={{ color: 'var(--muted)' }}>
+            <p className="text-[11px] md:text-[11.5px] leading-[1.65] hidden md:block" style={{ color: 'var(--muted)' }}>
               个性化你的对话环境
             </p>
           </div>
 
-          {/* 导航列表 */}
-          <nav className="flex-1 p-3 space-y-0.5">
+          {/* 导航列表 - 移动端水平滚动 */}
+          <nav className="flex-1 p-2 md:p-3 flex md:flex-col md:space-y-0.5 gap-1 overflow-x-auto md:overflow-x-visible">
             {sections.map((s) => {
               const isActive = activeSection === s.id;
               return (
                 <button
                   key={s.id}
                   onClick={() => setActiveSection(s.id)}
-                  className={`group relative w-full flex items-center gap-3 pl-3 pr-3 py-2.5 text-left transition-quick press-shrink ${
+                  className={`group relative flex items-center gap-2 md:gap-3 pl-2 md:pl-3 pr-2 md:pr-3 py-2 md:py-2.5 text-left transition-quick press-shrink whitespace-nowrap flex-shrink-0 md:flex-shrink ${
                     isActive ? '' : 'hover:bg-[var(--paper-2)]'
                   }`}
                   style={{
@@ -224,12 +224,12 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
                 >
                   {isActive && (
                     <span
-                      className="vertical-accent absolute left-0 top-2 bottom-2 w-[2px]"
+                      className="vertical-accent absolute left-0 top-2 bottom-2 w-[2px] hidden md:block"
                       style={{ background: 'var(--accent)' }}
                     />
                   )}
                   <span
-                    className="font-mono-ui text-[10px] tracking-[0.1em] w-5"
+                    className="font-mono-ui text-[10px] tracking-[0.1em] w-5 hidden md:inline"
                     style={{ color: isActive ? 'var(--accent)' : 'var(--muted-2)' }}
                   >
                     {s.code}
@@ -241,31 +241,25 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
                     {s.icon}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-medium tracking-[-0.005em]">{s.label}</div>
+                    <div className="text-[12px] md:text-[13px] font-medium tracking-[-0.005em]">{s.label}</div>
                   </div>
-                  <span
-                    className="text-[9.5px] uppercase tracking-[0.12em] font-mono-ui opacity-0 group-hover:opacity-100 transition-quick"
-                    style={{ color: 'var(--muted-2)' }}
-                  >
-                    {s.en}
-                  </span>
                 </button>
               );
             })}
           </nav>
 
           {/* 底部状态 */}
-          <div className="p-4 hairline-t">
+          <div className="p-3 md:p-4 hairline-t flex-shrink-0">
             <div className="flex items-center justify-between mb-2">
               <span className="eyebrow" style={{ color: 'var(--muted-2)' }}>Status</span>
               <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
-                <span className="text-[10.5px] font-mono-ui" style={{ color: 'var(--muted)' }}>Active</span>
+                <span className="text-[10.5px] font-mono-ui hidden md:inline" style={{ color: 'var(--muted)' }}>Active</span>
               </span>
             </div>
             <button
               onClick={onClose}
-              className="tactile w-full flex items-center justify-center gap-2 press-shrink"
+              className="tactile w-full flex items-center justify-center gap-2 press-shrink text-[13px]"
             >
               <span>完成</span>
               <span className="font-mono-ui text-[9.5px] opacity-70">↩</span>
@@ -276,7 +270,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
         {/* 右侧内容 */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Section header */}
-          <div className="px-7 pt-6 pb-4 hairline-b">
+          <div className="px-4 md:px-7 pt-4 md:pt-6 pb-3 md:pb-4 hairline-b">
             <div className="flex items-start justify-between mb-2">
               <div>
                 <div className="eyebrow eyebrow-accent mb-1.5">
@@ -302,7 +296,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-7 py-6">
+          <div className="flex-1 overflow-y-auto px-4 md:px-7 py-4 md:py-6">
             {activeSection === 'api' && (
               <div className="space-y-6 cinematic-fade">
                 <div
@@ -728,7 +722,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
                 </Field>
 
                 <Field code="D.1" label="预设背景" tip="精选沉稳色板 · 编辑设计风格">
-                  <div className="grid grid-cols-4 gap-2.5">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
                     {PRESET_WALLPAPERS.map((p, idx) => (
                       <button
                         key={p.name}
@@ -832,7 +826,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
                 </Field>
 
                 <Field code="D.3" label="全局滤镜" tip="为全局默认背景叠加 CSS 滤镜">
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {FILTER_PRESETS.map((f) => {
                       const isActive = (settings.wallpaperFilter || '') === f.value;
                       return (
@@ -879,7 +873,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
                 </Field>
 
                 <Field code="D.4" label="全局动画" tip="为全局默认背景添加动态效果">
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                     {ANIMATION_PRESETS.map((a) => {
                       const isActive = (settings.wallpaperAnimation || 'none') === a.value;
                       return (
@@ -1015,7 +1009,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
                     <span>功能</span>
                     <span>{FEATURES.length} 项核心</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                     {FEATURES.map((f, idx) => (
                       <div
                         key={f.name}

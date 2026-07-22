@@ -16,6 +16,7 @@ const App: React.FC = () => {
   // Landing is the first screen users see. From there the only way forward
   // is into the chat. Once inside the chat, there is no path back.
   const [appLaunched, setAppLaunched] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // 全局状态
   const {
@@ -187,16 +188,51 @@ const App: React.FC = () => {
       {/* 背景由 ChatView 内部渲染（对话级 background 优先，回退到全局 wallpaper），
           不再在此处渲染冗余的全局背景层，避免双层重叠导致背景替换时旧背景残留 */}
 
+      {/* 移动端顶部导航栏 */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-2.5 hairline-b" style={{ background: 'var(--surface)' }}>
+        <button
+          onClick={() => setMobileSidebarOpen(true)}
+          className="p-1.5 -ml-1 press-shrink"
+          style={{ color: 'var(--ink)' }}
+          aria-label="打开菜单"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+        <span className="font-display text-[16px] font-light tracking-[-0.01em]" style={{ color: 'var(--ink)' }}>Atelier</span>
+        <button
+          onClick={() => { setShowCharacters(true); }}
+          className="p-1.5 -mr-1 press-shrink"
+          style={{ color: 'var(--ink)' }}
+          aria-label="新对话"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </button>
+      </div>
+
+      {/* 移动端侧边栏遮罩 */}
+      {mobileSidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm fade-in"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+
       {/* 左侧边栏 */}
       <Sidebar
         conversations={conversations}
         activeId={activeConversationId}
-        onSelect={handleSelect}
-        onCreate={handleCreate}
+        onSelect={(id) => { handleSelect(id); setMobileSidebarOpen(false); }}
+        onCreate={(characterId) => { handleCreate(characterId); setMobileSidebarOpen(false); }}
         onDelete={handleDelete}
         onRename={handleRename}
-        onOpenSettings={() => setShowSettings(true)}
-        onOpenCharacters={() => setShowCharacters(true)}
+        onOpenSettings={() => { setShowSettings(true); setMobileSidebarOpen(false); }}
+        onOpenCharacters={() => { setShowCharacters(true); setMobileSidebarOpen(false); }}
+        mobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
       />
 
       {/* 中间聊天区域 */}

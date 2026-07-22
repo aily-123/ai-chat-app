@@ -275,11 +275,11 @@ export const BackgroundPanel: React.FC<Props> = ({
       onClick={onClose}
     >
       <div
-        className="editorial-card w-full max-w-2xl max-h-[88vh] overflow-hidden rounded-md cinematic-rise"
+        className="editorial-card w-full max-w-full md:max-w-2xl max-h-[88vh] overflow-hidden rounded-md cinematic-rise"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 头部 */}
-        <div className="px-7 pt-6 pb-5 hairline-b">
+        <div className="px-4 md:px-7 pt-5 md:pt-6 pb-4 md:pb-5 hairline-b">
           <div className="flex items-start justify-between mb-3">
             <div>
               <div className="eyebrow eyebrow-accent mb-1.5">No. 02 — Backdrop</div>
@@ -302,7 +302,7 @@ export const BackgroundPanel: React.FC<Props> = ({
           </p>
         </div>
 
-        <div className="px-7 py-6 overflow-y-auto max-h-[calc(88vh-180px)] space-y-7">
+        <div className="px-4 md:px-7 py-5 md:py-6 overflow-y-auto max-h-[calc(88vh-180px)] space-y-7">
           {/* A · 预览 */}
           <div className="cinematic-fade">
             <div className="flex items-baseline justify-between mb-3">
@@ -407,7 +407,7 @@ export const BackgroundPanel: React.FC<Props> = ({
               <span>C · 调色板</span>
               <span>{PRESETS.length}</span>
             </div>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {PRESETS.map((p, idx) => {
                 const isActive = localBg === p.value;
                 return (
@@ -449,7 +449,7 @@ export const BackgroundPanel: React.FC<Props> = ({
               <span>D · 自定义</span>
               <span>UPLOAD</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading || isGenerating}
@@ -510,7 +510,7 @@ export const BackgroundPanel: React.FC<Props> = ({
                 暂无收藏 — 选择背景后点击右上角「+ 收藏」即可保存
               </div>
             ) : (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {savedBackgrounds.map((saved) => {
                   const isActive = localBg === saved.value;
                   return (
@@ -569,7 +569,7 @@ export const BackgroundPanel: React.FC<Props> = ({
               <span>F · 滤镜</span>
               <span>{localFilter ? 'ON' : 'OFF'}</span>
             </div>
-            <div className="grid grid-cols-6 gap-2">
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
               {FILTER_PRESETS.map((f) => {
                 const isActive = localFilter === f.value;
                 return (
@@ -598,7 +598,7 @@ export const BackgroundPanel: React.FC<Props> = ({
               <span>G · 动画</span>
               <span>{ANIMATION_PRESETS.find(a => a.value === localAnimation)?.name || 'NONE'}</span>
             </div>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
               {ANIMATION_PRESETS.map((a) => {
                 const isActive = localAnimation === a.value;
                 return (
@@ -677,7 +677,7 @@ export const BackgroundPanel: React.FC<Props> = ({
         </div>
 
         {/* 底部 */}
-        <div className="px-7 py-4 hairline-t flex justify-end items-center gap-3">
+        <div className="px-4 md:px-7 py-3 md:py-4 hairline-t flex justify-end items-center gap-3">
           <span className="text-[10.5px] tracking-wider" style={{ color: 'var(--muted-2)' }}>
             — Atelier · Backdrop —
           </span>

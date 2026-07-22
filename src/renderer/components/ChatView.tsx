@@ -220,9 +220,9 @@ export const ChatView: React.FC<Props> = ({
         className="flex-1 flex items-stretch relative z-10 grain overflow-hidden"
         style={{ background: 'var(--paper)' }}
       >
-        <div className="w-full h-full flex fade-in">
+        <div className="w-full h-full flex flex-col md:flex-row fade-in">
           {/* Left — Invitation column */}
-          <div className="flex-1 flex flex-col justify-between px-14 py-10 max-w-[58%]">
+          <div className="flex-1 flex flex-col justify-between px-6 md:px-14 py-8 md:py-10 max-w-full md:max-w-[58%]">
             {/* Top editorial label */}
             <div className="flex items-baseline gap-2.5">
               <span className="numeric-badge">N° 01</span>
@@ -298,9 +298,9 @@ export const ChatView: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Right — Editorial features (compact 2x2 grid) */}
+          {/* Right — Editorial features (hidden on mobile) */}
           <div
-            className="w-[42%] max-w-[480px] min-w-[380px] hairline-l flex flex-col relative"
+            className="hidden md:flex w-full md:w-[42%] max-w-full md:max-w-[480px] md:min-w-[380px] hairline-l flex-col relative"
             style={{ background: 'var(--surface)' }}
           >
             {/* Decorative corner mark */}
@@ -521,7 +521,7 @@ export const ChatView: React.FC<Props> = ({
 
       {/* 顶部标题栏 */}
       <header
-        className={`px-8 py-3 hairline-b flex items-center gap-5 z-20 relative transition-quick ${
+        className={`px-4 md:px-8 py-3 hairline-b flex items-center gap-3 md:gap-5 z-20 relative transition-quick ${
           headerScrolled ? 'header-scrolled' : ''
         }`}
         style={{
@@ -654,7 +654,7 @@ export const ChatView: React.FC<Props> = ({
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto relative z-10 scroll-area"
       >
-        <div key={conversation?.id || 'empty'} className="max-w-3xl mx-auto px-8 py-6 page-transition">
+        <div key={conversation?.id || 'empty'} className="max-w-3xl mx-auto px-4 md:px-8 py-6 page-transition">
           {messages.length === 0 && !isStreaming && (
             <div className="text-center mt-12 fade-in">
               <div className="eyebrow mb-5">— Opening —</div>

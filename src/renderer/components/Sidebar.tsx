@@ -11,6 +11,10 @@ interface Props {
   onRename: (id: string, title: string) => void;
   onOpenSettings: () => void;
   onOpenCharacters: () => void;
+  /** 移动端侧边栏是否打开 */
+  mobileOpen?: boolean;
+  /** 关闭移动端侧边栏 */
+  onCloseMobile?: () => void;
 }
 
 export const Sidebar: React.FC<Props> = ({
@@ -22,6 +26,8 @@ export const Sidebar: React.FC<Props> = ({
   onRename,
   onOpenSettings,
   onOpenCharacters,
+  mobileOpen,
+  onCloseMobile,
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -64,10 +70,10 @@ export const Sidebar: React.FC<Props> = ({
   const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
   const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-  // Collapsed — slim column
+  // Collapsed — slim column (desktop only, hidden on mobile)
   if (collapsed) {
     return (
-      <aside className="w-[68px] h-full flex flex-col surface-glass hairline-r relative z-20">
+      <aside className="hidden md:flex w-[68px] h-full flex-col surface-glass hairline-r relative z-20">
         <div className="p-4 flex justify-center hairline-b">
           <button
             onClick={() => setCollapsed(false)}
@@ -126,8 +132,30 @@ export const Sidebar: React.FC<Props> = ({
     );
   }
 
+  const sidebarClasses = mobileOpen !== undefined
+    ? `fixed md:relative top-0 left-0 bottom-0 z-50 w-72 h-full flex flex-col surface-glass hairline-r transition-transform duration-300 ${
+        mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`
+    : 'w-72 h-full flex flex-col surface-glass hairline-r relative z-20';
+
   return (
-    <aside className="w-72 h-full flex flex-col surface-glass hairline-r relative z-20">
+    <aside className={sidebarClasses}>
+      {/* 移动端关闭按钮 */}
+      {onCloseMobile && (
+        <div className="md:hidden flex items-center justify-between px-4 py-2.5 hairline-b">
+          <span className="font-display text-[14px] font-light tracking-[-0.01em]" style={{ color: 'var(--ink)' }}>菜单</span>
+          <button
+            onClick={onCloseMobile}
+            className="p-1.5 -mr-1 press-shrink"
+            style={{ color: 'var(--ink)' }}
+            aria-label="关闭菜单"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
       {/* Masthead — editorial */}
       <div className="px-5 pt-5 pb-3 hairline-b">
         <div className="flex items-start justify-between mb-2">

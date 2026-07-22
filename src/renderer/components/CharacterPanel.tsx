@@ -194,12 +194,12 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
       onClick={onClose}
     >
       <div
-        className="editorial-card w-full max-w-[1000px] max-h-[95vh] flex flex-col cinematic-rise"
+        className="editorial-card w-full max-w-[1000px] max-h-[95vh] mx-0 md:mx-auto flex flex-col cinematic-rise"
         style={{ borderRadius: 6 }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Header row ── */}
-        <div className="flex items-center justify-between px-6 py-4 hairline-b flex-shrink-0">
+        <div className="flex items-center justify-between px-4 md:px-6 py-4 hairline-b flex-shrink-0">
           <div>
             <div className="eyebrow eyebrow-accent mb-1">
               {isEditing
@@ -227,7 +227,7 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
            ═══════════════════════════════════════════ */}
         <div className="flex-shrink-0 hairline-b">
           {/* Toolbar: search + create button */}
-          <div className="flex items-center gap-3 px-5 pt-4 pb-3">
+          <div className="flex items-center gap-3 px-3 md:px-5 pt-4 pb-3">
             <div className="relative flex-1" style={{ border: '1px solid var(--hairline-strong)' }}>
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none"
                 fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}
@@ -256,7 +256,7 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
           </div>
 
           {/* Horizontal scrolling character cards */}
-          <div className="overflow-x-auto px-5 pb-4">
+          <div className="overflow-x-auto px-3 md:px-5 pb-4">
             {filtered.length === 0 ? (
               <div className="text-center py-8 cinematic-fade">
                 <p className="text-[13px] tracking-wider" style={{ color: 'var(--muted-2)' }}>
@@ -278,6 +278,7 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
                         animationDelay: `${idx * 25}ms`,
                         background: isActive ? 'var(--paper-2)' : 'transparent',
                         width: 220,
+                        minWidth: 180,
                       }}
                     >
                       {isActive && (
@@ -323,7 +324,7 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
             ROW 2 — Detail / Edit form
            ═══════════════════════════════════════════ */}
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto p-5">
+          <div className="flex-1 overflow-y-auto p-3 md:p-5">
             {!selectedCharacter && !isEditing ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-20 cinematic-fade">
                 <div
@@ -516,7 +517,7 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
                 </div>
 
                 {/* Row 2: Bio + Opening (2 columns) */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <EditorialField
                     label="角色简介"
                     en="BIO"
@@ -721,7 +722,7 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
                     <div className="text-[10px] tracking-[0.18em] uppercase mb-2" style={{ color: 'var(--muted-2)' }}>
                       调色板
                     </div>
-                    <div className="grid grid-cols-8 gap-2">
+                    <div className="grid grid-cols-4 md:grid-cols-8 gap-2">
                       {BG_PRESETS.map((p) => {
                         const isActive = formData.background === p.value;
                         return (
@@ -747,7 +748,7 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
                   </div>
 
                   {/* 上传 + URL + 清除 */}
-                  <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
                     <button
                       type="button"
                       onClick={() => bgFileInputRef.current?.click()}

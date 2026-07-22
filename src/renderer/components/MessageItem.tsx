@@ -161,7 +161,7 @@ export const MessageItem: React.FC<Props> = ({
 
         {/* Content */}
         <div className={`flex-1 min-w-0 ${isUser ? 'flex justify-end' : ''}`}>
-          <div className={`relative ${isUser ? 'max-w-[80%]' : 'max-w-[88%]'}`}>
+          <div className={`relative ${isUser ? 'max-w-[92%] md:max-w-[80%]' : 'max-w-[95%] md:max-w-[88%]'}`}>
             {/* AI message: editorial body with vertical accent line */}
             {!isUser ? (
               <div
