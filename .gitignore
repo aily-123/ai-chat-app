@@ -9,3 +9,4 @@ backend/data/
 .env.production
 .DS_Store
 Thumbs.db
+deploy-edge.js
