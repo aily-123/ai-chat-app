@@ -181,27 +181,27 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
       onClick={onClose}
     >
       <div
-        className="editorial-card w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-md flex cinematic-rise"
+        className="editorial-card w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-md flex flex-col md:flex-row cinematic-rise"
         onClick={(e) => e.stopPropagation()}
         style={{ background: 'var(--paper)' }}
       >
         {/* 左侧导航 */}
         <div
-          className="w-full md:w-60 hairline-b md:hairline-r md:hairline-b-0 flex flex-col overflow-x-auto md:overflow-x-visible"
+          className="w-full md:w-60 hairline-b md:hairline-r md:hairline-b-0 flex flex-col flex-shrink-0"
           style={{ background: 'var(--surface)' }}
         >
-          {/* Masthead */}
-          <div className="px-4 md:px-6 pt-4 md:pt-6 pb-4 md:pb-5 hairline-b flex-shrink-0">
-            <div className="flex items-start justify-between mb-2 md:mb-3">
+          {/* Masthead — 移动端隐藏 */}
+          <div className="hidden md:block px-6 pt-6 pb-5 hairline-b">
+            <div className="flex items-start justify-between mb-3">
               <div>
-                <div className="eyebrow eyebrow-accent mb-1 md:mb-1.5">Preferences</div>
-                <h2 className="font-display text-[20px] md:text-[24px] leading-[1.05] font-light tracking-[-0.025em]" style={{ color: 'var(--ink)' }}>
+                <div className="eyebrow eyebrow-accent mb-1.5">Preferences</div>
+                <h2 className="font-display text-[24px] leading-[1.05] font-light tracking-[-0.025em]" style={{ color: 'var(--ink)' }}>
                   设<em className="italic font-extralight" style={{ color: 'var(--accent)' }}>置</em>
                 </h2>
               </div>
-              <span className="numeric-badge mt-1 hidden md:block">05</span>
+              <span className="numeric-badge mt-1">05</span>
             </div>
-            <p className="text-[11px] md:text-[11.5px] leading-[1.65] hidden md:block" style={{ color: 'var(--muted)' }}>
+            <p className="text-[11.5px] leading-[1.65]" style={{ color: 'var(--muted)' }}>
               个性化你的对话环境
             </p>
           </div>
@@ -248,13 +248,13 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
             })}
           </nav>
 
-          {/* 底部状态 */}
-          <div className="p-3 md:p-4 hairline-t flex-shrink-0">
+          {/* 底部状态 — 移动端隐藏 */}
+          <div className="hidden md:block p-4 hairline-t flex-shrink-0">
             <div className="flex items-center justify-between mb-2">
               <span className="eyebrow" style={{ color: 'var(--muted-2)' }}>Status</span>
               <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--accent)' }} />
-                <span className="text-[10.5px] font-mono-ui hidden md:inline" style={{ color: 'var(--muted)' }}>Active</span>
+                <span className="text-[10.5px] font-mono-ui" style={{ color: 'var(--muted)' }}>Active</span>
               </span>
             </div>
             <button
@@ -268,7 +268,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) 
         </div>
 
         {/* 右侧内容 */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
           {/* Section header */}
           <div className="px-4 md:px-7 pt-4 md:pt-6 pb-3 md:pb-4 hairline-b">
             <div className="flex items-start justify-between mb-2">
