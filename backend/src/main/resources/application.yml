@@ -1,0 +1,37 @@
+server:
+  port: 8080
+
+spring:
+  # 默认使用 H2 开发环境（无需安装 MySQL，数据存储在文件）
+  # 切换到 MySQL 时取消注释下方配置，注释掉 H2 配置
+  datasource:
+    url: jdbc:h2:file:./data/ai_chat;MODE=MySQL;DB_CLOSE_DELAY=-1;AUTO_RECONNECT=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  # MySQL 配置（切换到 MySQL 时使用）
+  # datasource:
+  #   url: jdbc:mysql://localhost:3306/ai_chat?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&characterEncoding=utf8mb4
+  #   username: root
+  #   password: root
+  #   driver-class-name: com.mysql.cj.jdbc.Driver
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    # H2 模式下不需要 MySQL 方言
+    # database-platform: org.hibernate.dialect.H2Dialect
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
