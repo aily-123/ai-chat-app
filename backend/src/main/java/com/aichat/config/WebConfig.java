@@ -24,7 +24,6 @@ public class WebConfig implements WebMvcConfigurer {
                         if (requestedResource.exists() && requestedResource.isReadable()) {
                             return requestedResource;
                         }
-                        // SPA fallback: serve index.html for all non-API routes
                         return new ClassPathResource("/static/index.html");
                     }
                 });
