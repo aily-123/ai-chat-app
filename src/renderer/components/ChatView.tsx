@@ -217,7 +217,7 @@ export const ChatView: React.FC<Props> = ({
   if (!conversation) {
     return (
       <main
-        className="flex-1 flex items-stretch relative z-10 grain overflow-hidden"
+        className="flex-1 flex items-stretch relative z-10 grain overflow-hidden pt-12 md:pt-0"
         style={{ background: 'var(--paper)' }}
       >
         <div className="w-full h-full flex flex-col md:flex-row fade-in">
@@ -463,7 +463,7 @@ export const ChatView: React.FC<Props> = ({
     ''; // parallax 已通过 scroll 处理
 
   return (
-    <main className="flex-1 flex flex-col relative z-10 min-w-0">
+    <main className="flex-1 flex flex-col relative z-10 min-w-0 pt-12 md:pt-0">
       {/* 顶部细线进度条 — 阅读进度（advanced gradient） */}
       <div
         className="absolute top-0 left-0 right-0 h-[2px] z-30 transition-quick scroll-progress"

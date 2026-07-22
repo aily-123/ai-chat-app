@@ -262,42 +262,24 @@ const App: React.FC = () => {
         onClearAfterMessage={clearAfterMessage}
       />
 
-      {/* 设置弹窗 — with page transition */}
+      {/* 设置弹窗 — SettingsPanel 自身渲染全屏 overlay */}
       {showSettings && (
-        <div key="settings-modal" className="modal-backdrop fade-in" onClick={() => setShowSettings(false)}>
-          <div
-            className="modal-panel slide-right"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
-            <SettingsPanel
-              settings={settings}
-              onUpdate={updateSettings}
-              onClose={() => setShowSettings(false)}
-            />
-          </div>
-        </div>
+        <SettingsPanel
+          settings={settings}
+          onUpdate={updateSettings}
+          onClose={() => setShowSettings(false)}
+        />
       )}
 
-      {/* 角色管理弹窗 — with page transition */}
+      {/* 角色管理弹窗 — CharacterPanel 自身渲染全屏 overlay */}
       {showCharacters && (
-        <div key="characters-modal" className="modal-backdrop fade-in" onClick={() => setShowCharacters(false)}>
-          <div
-            className="modal-panel slide-right"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-          >
-            <CharacterPanel
-              onClose={() => setShowCharacters(false)}
-              onStartChat={(characterId) => {
-                handleCreate(characterId);
-                setShowCharacters(false);
-              }}
-            />
-          </div>
-        </div>
+        <CharacterPanel
+          onClose={() => setShowCharacters(false)}
+          onStartChat={(characterId) => {
+            handleCreate(characterId);
+            setShowCharacters(false);
+          }}
+        />
       )}
     </div>
   );
