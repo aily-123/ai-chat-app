@@ -1,8 +1,11 @@
-.iga/
+
 node_modules/
 dist/
+.iga/
 backend/target/
 backend/data/
 *.log
-.env
 .env.local
+.env.*.local
+.DS_Store
+Thumbs.db
