@@ -7,9 +7,9 @@ nixPkgs = ["maven", "jdk", "nodejs"]
 cmds = [
   "npm install",
   "npm run build",
-  "ls -la dist/",
   "mkdir -p backend/src/main/resources/static",
-  "cp -r dist/index.html dist/assets/ backend/src/main/resources/static/",
+  "cp dist/index.html backend/src/main/resources/static/",
+  "cp -r dist/assets backend/src/main/resources/static/",
   "cd backend && mvn clean package -DskipTests -q"
 ]
 
