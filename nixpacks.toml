@@ -5,8 +5,9 @@ nixPkgs = ["maven", "jdk", "nodejs"]
 
 [phases.build]
 cmds = [
-  "chmod +x build.sh",
-  "./build.sh"
+  "npm install",
+  "npm run build",
+  "cd backend && mvn clean package -DskipTests -q"
 ]
 
 [start]
