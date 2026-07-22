@@ -1,1 +1,0 @@
-web: java -jar target/ai-chat-backend-1.0.0.jar
