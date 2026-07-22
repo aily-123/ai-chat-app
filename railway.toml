@@ -1,0 +1,6 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "cd backend && mvn clean package -DskipTests -q"
+
+[deploy]
+startCommand = "java -jar backend/target/ai-chat-backend-1.0.0.jar"
