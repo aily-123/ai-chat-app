@@ -1,12 +1,40 @@
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Build output
 dist/
-.iga/
-backend/target/
-backend/data/
-*.log
+build/
+
+# Environment
 .env
 .env.local
-.env.production
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
 .DS_Store
 Thumbs.db
-deploy-edge.js
+
+# Java
+backend/target/
+backend/*.jar
+backend/*.war
+*.class
+*.log
+*.tmp
+
+# Database files
+backend/data/
+
+# IGA
+.iga/
+
+# Electron
+out/
