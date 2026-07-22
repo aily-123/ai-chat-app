@@ -123,20 +123,34 @@ export const PlotPanel: React.FC<Props> = ({
   };
 
   const handleApply = async () => {
-    onUpdate({ plotSetting, plotProgress, plotMode });
-    // 如果满足条件，自动发送开场白
-    if (shouldSendGreeting) {
-      await onSaveGreeting(characterGreeting!);
+    try {
+      onUpdate({ plotSetting, plotProgress, plotMode });
+      // 如果满足条件，自动发送开场白
+      if (shouldSendGreeting) {
+        await onSaveGreeting(characterGreeting!);
+      }
+      onClose(); // 成功后才关闭
+    } catch (err) {
+      console.error('Failed to apply plot settings:', err);
+      // 即使失败也关闭，避免卡住
+      onClose();
     }
   };
 
   const applyPreset = async (preset: typeof PLOT_PRESETS[0]) => {
-    setPlotSetting(preset.setting);
-    setPlotMode(true);
-    onUpdate({ plotSetting: preset.setting, plotMode: true });
-    // 如果满足条件，自动发送开场白
-    if (messageCount === 0 && characterGreeting && characterGreeting.trim().length > 0) {
-      await onSaveGreeting(characterGreeting);
+    try {
+      setPlotSetting(preset.setting);
+      setPlotMode(true);
+      onUpdate({ plotSetting: preset.setting, plotMode: true });
+      // 如果满足条件，自动发送开场白
+      if (messageCount === 0 && characterGreeting && characterGreeting.trim().length > 0) {
+        await onSaveGreeting(characterGreeting);
+      }
+      onClose(); // 成功后才关闭
+    } catch (err) {
+      console.error('Failed to apply preset:', err);
+      // 即使失败也关闭
+      onClose();
     }
   };
 
@@ -313,7 +327,7 @@ export const PlotPanel: React.FC<Props> = ({
           <div className="flex gap-2">
             <button onClick={onClose} className="tactile-ghost press-shrink">取消</button>
             <button
-              onClick={() => { handleApply(); onClose(); }}
+              onClick={handleApply}
               className="tactile press-shrink"
             >
               <span>保存设定</span>
