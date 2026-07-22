@@ -13,6 +13,8 @@ interface Props {
   webSearchEnabled?: boolean;
   /** 切换联网搜索开关 */
   onToggleWebSearch?: () => void;
+  /** 初始输入值（用于回溯时填充用户消息） */
+  initialInput?: string;
 }
 
 export const InputArea: React.FC<Props> = ({
@@ -25,8 +27,9 @@ export const InputArea: React.FC<Props> = ({
   placeholder,
   webSearchEnabled,
   onToggleWebSearch,
+  initialInput,
 }) => {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(initialInput || '');
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -41,6 +44,13 @@ export const InputArea: React.FC<Props> = ({
   useEffect(() => {
     if (!isStreaming) textareaRef.current?.focus();
   }, [isStreaming]);
+
+  // Sync input when initialInput changes (for rollback functionality)
+  useEffect(() => {
+    if (initialInput !== undefined) {
+      setInput(initialInput);
+    }
+  }, [initialInput]);
 
   const handleSend = () => {
     const trimmed = input.trim();

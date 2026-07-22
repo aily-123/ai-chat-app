@@ -68,6 +68,7 @@ export const ChatView: React.FC<Props> = ({
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [initialInput, setInitialInput] = useState<string | undefined>(undefined);
   const prevMsgCountRef = useRef(0);
   const userScrolledRef = useRef(false);
   const { settings, update: updateSettings } = useSettingsStore();
@@ -122,6 +123,10 @@ export const ChatView: React.FC<Props> = ({
       // 用户滚到了上面但有新消息
       setHasNewMessage(true);
     }
+    // 清除初始输入（如果消息数量增加，说明已发送）
+    if (messages.length > prevMsgCountRef.current) {
+      setInitialInput(undefined);
+    }
     prevMsgCountRef.current = messages.length;
   }, [messages, streamingContent]);
 
@@ -131,6 +136,7 @@ export const ChatView: React.FC<Props> = ({
       userScrolledRef.current = false;
       setHasNewMessage(false);
       prevMsgCountRef.current = 0;
+      setInitialInput(undefined);
       // 立即滚到底部
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
@@ -187,7 +193,7 @@ export const ChatView: React.FC<Props> = ({
    * 用户消息回溯（剧情模式专用）：
    * - 删除这条用户消息本身及其之后的所有消息
    * - 清空 AI 记忆（关键事实清单 + 长期摘要）
-   * - 重新发送该用户消息，从这一句开始全新的对话
+   * - 将用户消息内容填充到输入框供编辑
    */
   const handleBranchFromUser = useCallback(async (userMessageId: string) => {
     if (!conversation || isStreaming) return;
@@ -202,9 +208,9 @@ export const ChatView: React.FC<Props> = ({
       await onClearFromMessage(userMessageId);
     }
 
-    // 重新发送该用户消息，从这一句开始全新对话
-    onSend(userContent, { parentMessageId: null, branchMode: false });
-  }, [conversation, messages, isStreaming, onClearFromMessage, onSend]);
+    // 将用户消息填充到输入框供编辑，而不是立即发送
+    setInitialInput(userContent);
+  }, [conversation, messages, isStreaming, onClearFromMessage]);
 
   // 处理重写（最后一条助手消息）：复用 AI 消息回溯逻辑
   const handleRegenerateLast = useCallback(() => {
@@ -875,6 +881,7 @@ export const ChatView: React.FC<Props> = ({
           onToggleWebSearch={() => {
             updateSettings({ webSearchEnabled: !settings.webSearchEnabled });
           }}
+          initialInput={initialInput}
           placeholder={
             conversation.plotMode
               ? '推进剧情…（可用 [行动] 指令）'

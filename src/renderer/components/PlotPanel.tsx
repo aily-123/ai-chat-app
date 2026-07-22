@@ -190,116 +190,112 @@ export const PlotPanel: React.FC<Props> = ({
           </div>
 
           {/* 预设 */}
-          {plotMode && (
-            <>
-              <div className="cinematic-fade">
-                <div className="hairline-ticker mb-4">
-                  <span>A · 剧本集</span>
-                  <span>{PLOT_PRESETS.length} 款</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {PLOT_PRESETS.map((p, idx) => (
-                    <button
-                      key={p.name}
-                      onClick={() => applyPreset(p)}
-                      className="group relative p-4 hairline hover:border-[var(--ink-2)] hover:bg-[var(--paper-2)] transition-quick text-left press-shrink cinematic-fade"
-                      style={{ animationDelay: `${idx * 40}ms` }}
+          <div className="cinematic-fade">
+            <div className="hairline-ticker mb-4">
+              <span>A · 剧本集</span>
+              <span>{PLOT_PRESETS.length} 款</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {PLOT_PRESETS.map((p, idx) => (
+                <button
+                  key={p.name}
+                  onClick={() => applyPreset(p)}
+                  className="group relative p-4 hairline hover:border-[var(--ink-2)] hover:bg-[var(--paper-2)] transition-quick text-left press-shrink cinematic-fade"
+                  style={{ animationDelay: `${idx * 40}ms` }}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <span
+                      className="font-display text-[26px] font-light leading-none"
+                      style={{ color: 'var(--accent)' }}
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <span
-                          className="font-display text-[26px] font-light leading-none"
-                          style={{ color: 'var(--accent)' }}
-                        >
-                          {p.glyph}
-                        </span>
-                        <span className="numeric-badge" style={{ color: 'var(--muted-2)' }}>{p.en}</span>
-                      </div>
-                      <div className="font-display text-[15px] font-light tracking-[-0.01em] mt-3" style={{ color: 'var(--ink)' }}>
-                        {p.name}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+                      {p.glyph}
+                    </span>
+                    <span className="numeric-badge" style={{ color: 'var(--muted-2)' }}>{p.en}</span>
+                  </div>
+                  <div className="font-display text-[15px] font-light tracking-[-0.01em] mt-3" style={{ color: 'var(--ink)' }}>
+                    {p.name}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
 
-              {/* 剧情设定 */}
-              <div>
-                <div className="hairline-ticker mb-4">
-                  <span>B · 剧情设定</span>
-                  <span>必填</span>
-                </div>
-                <textarea
-                  value={plotSetting}
-                  onChange={(e) => setPlotSetting(e.target.value)}
-                  rows={10}
-                  className="w-full px-4 py-3 text-[13.5px] leading-[1.75] hairline bg-transparent focus:outline-none focus:border-[var(--ink-2)] glow-on-focus transition-quick resize-none font-mono-ui"
-                  style={{ color: 'var(--ink)', borderRadius: 4 }}
-                  placeholder={`请描述：
+          {/* 剧情设定 */}
+          <div>
+            <div className="hairline-ticker mb-4">
+              <span>B · 剧情设定</span>
+              <span>必填</span>
+            </div>
+            <textarea
+              value={plotSetting}
+              onChange={(e) => setPlotSetting(e.target.value)}
+              rows={10}
+              className="w-full px-4 py-3 text-[13.5px] leading-[1.75] hairline bg-transparent focus:outline-none focus:border-[var(--ink-2)] glow-on-focus transition-quick resize-none font-mono-ui"
+              style={{ color: 'var(--ink)', borderRadius: 4 }}
+              placeholder={`请描述：
 • 世界观 / 时代背景
 • 场景设定（地点、时间）
 • 主要角色身份与性格
 • 剧情主线 / 故事走向
 • 关键节点 / 起承转合
 • 任何特殊规则或铁律`}
-                />
-                <div className="mt-1.5 flex items-center justify-between text-[10.5px] tracking-wider" style={{ color: 'var(--muted-2)' }}>
-                  <span>世界观 · 角色 · 主线 · 铁律</span>
-                  <span className="numeric-badge">{String(plotSetting.length).padStart(4, '0')} 字</span>
-                </div>
-              </div>
+            />
+            <div className="mt-1.5 flex items-center justify-between text-[10.5px] tracking-wider" style={{ color: 'var(--muted-2)' }}>
+              <span>世界观 · 角色 · 主线 · 铁律</span>
+              <span className="numeric-badge">{String(plotSetting.length).padStart(4, '0')} 字</span>
+            </div>
+          </div>
 
-              {/* 当前进度 */}
-              <div>
-                <div className="hairline-ticker mb-4">
-                  <span>C · 当前进度</span>
-                  <span>可选</span>
-                </div>
-                <textarea
-                  value={plotProgress}
-                  onChange={(e) => setPlotProgress(e.target.value)}
-                  rows={4}
-                  className="w-full px-4 py-3 text-[13.5px] leading-[1.75] hairline bg-transparent focus:outline-none focus:border-[var(--ink-2)] glow-on-focus transition-quick resize-none font-mono-ui"
-                  style={{ color: 'var(--ink)', borderRadius: 4 }}
-                  placeholder={`记录当前剧情已经推进到哪里，方便 AI 把握节奏。
+          {/* 当前进度 */}
+          <div>
+            <div className="hairline-ticker mb-4">
+              <span>C · 当前进度</span>
+              <span>可选</span>
+            </div>
+            <textarea
+              value={plotProgress}
+              onChange={(e) => setPlotProgress(e.target.value)}
+              rows={4}
+              className="w-full px-4 py-3 text-[13.5px] leading-[1.75] hairline bg-transparent focus:outline-none focus:border-[var(--ink-2)] glow-on-focus transition-quick resize-none font-mono-ui"
+              style={{ color: 'var(--ink)', borderRadius: 4 }}
+              placeholder={`记录当前剧情已经推进到哪里，方便 AI 把握节奏。
 
 例如：
 - 第一章已完成：与女主角在咖啡馆相遇
 - 第二章进行中：调查废弃工厂
 - 已解锁线索：神秘符号、半截照片、加密录音`}
-                />
-                <div className="mt-1.5 flex items-center justify-end">
-                  <span className="numeric-badge">{String(plotProgress.length).padStart(4, '0')} 字</span>
-                </div>
-              </div>
+            />
+            <div className="mt-1.5 flex items-center justify-end">
+              <span className="numeric-badge">{String(plotProgress.length).padStart(4, '0')} 字</span>
+            </div>
+          </div>
 
-              {/* 提示 */}
-              <div className="p-5 hairline relative">
-                <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'var(--accent)' }} />
-                <div className="flex items-baseline gap-2 mb-3">
-                  <span className="eyebrow eyebrow-accent">D · 提示</span>
-                  <span className="numeric-badge">DIRECTOR'S NOTE</span>
-                </div>
-                <ul className="text-[12.5px] space-y-2 pl-0 list-none" style={{ color: 'var(--ink-2)' }}>
-                  <li className="flex items-start gap-3">
-                    <span className="numeric-badge pt-1 flex-shrink-0">01</span>
-                    <span>可用 <code className="px-1.5 py-0.5 bg-[var(--paper-2)] rounded-sm font-mono-ui text-[11.5px]" style={{ color: 'var(--accent)' }}>[行动描述]</code> 给智能体指令</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="numeric-badge pt-1 flex-shrink-0">02</span>
-                    <span>智能体会主动推进剧情、抛悬念、留钩子</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="numeric-badge pt-1 flex-shrink-0">03</span>
-                    <span>长期对话会自动压缩早期记忆，但剧情设定永久保留</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="numeric-badge pt-1 flex-shrink-0">04</span>
-                    <span>每次回复结尾 AI 会给出剧情走向建议</span>
-                  </li>
-                </ul>
-              </div>
-            </>
-          )}
+          {/* 提示 */}
+          <div className="p-5 hairline relative">
+            <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'var(--accent)' }} />
+            <div className="flex items-baseline gap-2 mb-3">
+              <span className="eyebrow eyebrow-accent">D · 提示</span>
+              <span className="numeric-badge">DIRECTOR'S NOTE</span>
+            </div>
+            <ul className="text-[12.5px] space-y-2 pl-0 list-none" style={{ color: 'var(--ink-2)' }}>
+              <li className="flex items-start gap-3">
+                <span className="numeric-badge pt-1 flex-shrink-0">01</span>
+                <span>可用 <code className="px-1.5 py-0.5 bg-[var(--paper-2)] rounded-sm font-mono-ui text-[11.5px]" style={{ color: 'var(--accent)' }}>[行动描述]</code> 给智能体指令</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="numeric-badge pt-1 flex-shrink-0">02</span>
+                <span>智能体会主动推进剧情、抛悬念、留钩子</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="numeric-badge pt-1 flex-shrink-0">03</span>
+                <span>长期对话会自动压缩早期记忆，但剧情设定永久保留</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="numeric-badge pt-1 flex-shrink-0">04</span>
+                <span>每次回复结尾 AI 会给出剧情走向建议</span>
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* 底部 */}
