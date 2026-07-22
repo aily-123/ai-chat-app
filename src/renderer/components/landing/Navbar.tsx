@@ -56,6 +56,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onLaunchApp }) => {
       >
         Enter Studio
       </Button>
+
+      {/* Mobile: Simple Enter button */}
+      <button
+        onClick={onLaunchApp}
+        className="md:hidden text-xs uppercase tracking-[0.2em] text-primary font-medium px-3 py-1.5 rounded-sm border border-primary/30 hover:bg-primary/5 active:scale-[0.97] transition-all"
+      >
+        Enter
+      </button>
     </nav>
   );
 };

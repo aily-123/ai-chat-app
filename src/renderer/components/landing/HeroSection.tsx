@@ -75,8 +75,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onLaunchApp }) => {
   return (
     <section
       id="top"
-      className="relative min-h-screen overflow-hidden pt-28 md:pt-32 pb-16 md:pb-24"
-      style={{ contentVisibility: 'auto', containIntrinsicSize: '100vh' }}
+      className="relative min-h-screen md:overflow-hidden pt-28 md:pt-32 pb-16 md:pb-24"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 100vh' }}
     >
       {/* ============================================================
           IMAGE BENTO — right side, asymmetric grid layout.
