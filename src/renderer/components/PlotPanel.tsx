@@ -129,7 +129,8 @@ export const PlotPanel: React.FC<Props> = ({
       if (shouldSendGreeting) {
         await onSaveGreeting(characterGreeting!);
       }
-      onClose(); // 成功后才关闭
+      // 成功后关闭
+      onClose();
     } catch (err) {
       console.error('Failed to apply plot settings:', err);
       // 即使失败也关闭，避免卡住
@@ -146,7 +147,8 @@ export const PlotPanel: React.FC<Props> = ({
       if (messageCount === 0 && characterGreeting && characterGreeting.trim().length > 0) {
         await onSaveGreeting(characterGreeting);
       }
-      onClose(); // 成功后才关闭
+      // 成功后关闭
+      onClose();
     } catch (err) {
       console.error('Failed to apply preset:', err);
       // 即使失败也关闭
