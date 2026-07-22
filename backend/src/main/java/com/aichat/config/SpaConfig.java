@@ -1,19 +1,28 @@
 package com.aichat.config;
 
-import org.springframework.boot.web.server.ErrorPage;
-import org.springframework.boot.web.server.WebServerFactoryCustomizer;
-import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 
-@Configuration
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
+@Controller
 public class SpaConfig {
 
-    @Bean
-    public WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> spaForwarding() {
-        return factory -> factory.addErrorPages(
-            new ErrorPage(HttpStatus.NOT_FOUND, "/index.html")
-        );
+    @GetMapping(value = {"/", "/{path:[^.]+}", "/{path:[^.]+}/**"})
+    public ResponseEntity<String> serveIndex() throws IOException {
+        ClassPathResource resource = new ClassPathResource("static/index.html");
+        if (!resource.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+        try (InputStream is = resource.getInputStream()) {
+            String content = StreamUtils.copyToString(is, StandardCharsets.UTF_8);
+            return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(content);
+        }
     }
 }
