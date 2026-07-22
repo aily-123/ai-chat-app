@@ -1,10 +1,16 @@
 providers = []
 
 [phases.setup]
-nixPkgs = ["maven", "jdk17"]
+nixPkgs = ["maven", "jdk17", "nodejs_22"]
 
 [phases.build]
-cmds = ["cd backend && mvn clean package -DskipTests -q"]
+cmds = [
+  "npm --prefix . install",
+  "npm --prefix . run build",
+  "mkdir -p backend/src/main/resources/static",
+  "cp -r dist/* backend/src/main/resources/static/",
+  "cd backend && mvn clean package -DskipTests -q"
+]
 
 [start]
 cmd = "java -jar backend/target/ai-chat-backend-1.0.0.jar"
