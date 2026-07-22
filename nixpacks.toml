@@ -1,11 +1,11 @@
 providers = []
 
 [phases.setup]
-nixPkgs = ["maven", "jdk", "nodejs"]
+nixPkgs = ["maven", "jdk"]
 
 [phases.build]
 cmds = [
-  "sh -c 'npm install && npm run build && mkdir -p backend/src/main/resources/static && cp -r dist/* backend/src/main/resources/static/ && cd backend && mvn clean package -DskipTests -q'"
+  "cd backend && mvn clean package -DskipTests -q"
 ]
 
 [start]
