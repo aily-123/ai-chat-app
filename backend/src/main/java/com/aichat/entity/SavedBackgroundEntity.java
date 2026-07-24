@@ -18,7 +18,7 @@ public class SavedBackgroundEntity {
     @Column(length = 255)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "bg_value", columnDefinition = "TEXT")
     private String value;
 
     @Column(length = 50)

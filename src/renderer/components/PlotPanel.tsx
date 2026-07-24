@@ -106,8 +106,8 @@ export const PlotPanel: React.FC<Props> = ({
   onClose
 }) => {
   const [plotMode, setPlotMode] = useState(conversation.plotMode);
-  const [plotSetting, setPlotSetting] = useState(conversation.plotSetting);
-  const [plotProgress, setPlotProgress] = useState(conversation.plotProgress);
+  const [plotSetting, setPlotSetting] = useState(conversation.plotSetting || '');
+  const [plotProgress, setPlotProgress] = useState(conversation.plotProgress || '');
   const [worldBook, setWorldBook] = useState(conversation.worldBook || '');
   const [characterStatus, setCharacterStatus] = useState(conversation.characterStatus || '');
 
@@ -119,14 +119,18 @@ export const PlotPanel: React.FC<Props> = ({
     characterGreeting.trim().length > 0
   );
 
-  const handleToggle = (v: boolean) => {
+  const handleToggle = async (v: boolean) => {
     setPlotMode(v);
-    onUpdate({ plotMode: v });
+    try {
+      await onUpdate({ plotMode: v });
+    } catch (err) {
+      console.error('Failed to toggle plot mode:', err);
+    }
   };
 
   const handleApply = async () => {
     try {
-      onUpdate({
+      await onUpdate({
         plotSetting,
         plotProgress,
         plotMode,
@@ -150,7 +154,7 @@ export const PlotPanel: React.FC<Props> = ({
     try {
       setPlotSetting(preset.setting);
       setPlotMode(true);
-      onUpdate({ plotSetting: preset.setting, plotMode: true });
+      await onUpdate({ plotSetting: preset.setting, plotMode: true });
       // 如果满足条件，自动发送开场白
       if (messageCount === 0 && characterGreeting && characterGreeting.trim().length > 0) {
         await onSaveGreeting(characterGreeting);
@@ -170,7 +174,7 @@ export const PlotPanel: React.FC<Props> = ({
       onClick={onClose}
     >
       <div
-        className="editorial-card w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-md cinematic-rise flex flex-col"
+        className="editorial-card w-full max-w-3xl max-h-[90vh] min-h-[60vh] overflow-hidden rounded-md cinematic-rise flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 头部 */}
@@ -196,7 +200,7 @@ export const PlotPanel: React.FC<Props> = ({
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-7 py-6 space-y-7">
+        <div className="flex-1 min-h-0 overflow-y-auto px-7 py-6 space-y-7">
           {/* 开关 — 编辑设计 toggle */}
           <div className="flex items-center justify-between p-4 hairline">
             <div className="flex-1 pr-6">
