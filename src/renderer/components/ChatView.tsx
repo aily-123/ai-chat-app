@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { MessageItem } from './MessageItem';
-import { InputArea } from './InputArea';
+import { InputArea, type InputAreaHandle } from './InputArea';
 import { BackgroundPanel } from './BackgroundPanel';
 import { PlotPanel } from './PlotPanel';
 import { MemoryPanel } from './MemoryPanel';
@@ -61,6 +61,7 @@ export const ChatView: React.FC<Props> = ({
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<InputAreaHandle>(null);
   const [showBgPanel, setShowBgPanel] = useState(false);
   const [showPlotPanel, setShowPlotPanel] = useState(false);
   const [showMemoryPanel, setShowMemoryPanel] = useState(false);
@@ -184,10 +185,13 @@ export const ChatView: React.FC<Props> = ({
   }, [conversation, messages, isStreaming, onClearAfterMessage, onBranchFrom, onSend]);
 
   /**
-   * 用户消息回溯（剧情模式专用）：
-   * - 删除这条用户消息本身及其之后的所有消息
-   * - 清空 AI 记忆（关键事实清单 + 长期摘要）
-   * - 重新发送该用户消息，从这一句开始全新的对话
+   * 用户消息回溯（所有模式通用）：
+   * - 删除这条用户消息本身及其之后的所有消息（包含 AI 回复）
+   * - 清空 AI 记忆（关键事实清单 + 长期摘要），让 AI 重新从零开始建立记忆
+   * - 把被回溯的这条用户消息原文回填到输入框（用户可编辑后再次发送）
+   *
+   * 这样设计的目的：用户对自己之前说的话不满意时，可以修改后重发，
+   * 同时 AI 不会带着原句的记忆来回复，完全当作"从这一刻开始的新对话"。
    */
   const handleBranchFromUser = useCallback(async (userMessageId: string) => {
     if (!conversation || isStreaming) return;
@@ -197,14 +201,17 @@ export const ChatView: React.FC<Props> = ({
 
     const userContent = userMsg.content;
 
-    // 清空式回溯：删除该消息及之后所有消息 + 重置 AI 记忆
+    // 1. 清空式回溯：删除该消息及之后所有消息 + 重置 AI 记忆
     if (onClearFromMessage) {
       await onClearFromMessage(userMessageId);
     }
 
-    // 重新发送该用户消息，从这一句开始全新对话
-    onSend(userContent, { parentMessageId: null, branchMode: false });
-  }, [conversation, messages, isStreaming, onClearFromMessage, onSend]);
+    // 2. 把被回溯的原文回填到输入框（不等用户确认，立即可编辑）
+    // 延迟一帧确保消息删除与 UI 更新完成后，再触发输入框回填，避免视觉跳动
+    requestAnimationFrame(() => {
+      inputRef.current?.setValue(userContent);
+    });
+  }, [conversation, messages, isStreaming, onClearFromMessage]);
 
   // 处理重写（最后一条助手消息）：复用 AI 消息回溯逻辑
   const handleRegenerateLast = useCallback(() => {
@@ -716,11 +723,9 @@ export const ChatView: React.FC<Props> = ({
               if (activeVersionIndex < 0) activeVersionIndex = 0;
             }
 
-            // 是否为剧情模式（用户消息在剧情模式下也显示回溯按钮）
-            const isPlotMode = conversation.plotMode;
-            // 是否为首条用户消息（首条不能回溯，否则会清空整个对话）
-            const isFirstUserMessage = msg.role === 'user' &&
-              messages.findIndex(m => m.role === 'user') === idx;
+            // 用户消息回溯：所有模式通用（剧情/普通），唯一限制是非"最后一条正在流的消息"
+            // 注：首条用户消息也允许回溯（相当于"重开对话"，同时清空记忆与所有 AI 回复）
+            const canUserBranch = msg.role === 'user' && onClearFromMessage;
 
             return (
               <MessageItem
@@ -730,18 +735,14 @@ export const ChatView: React.FC<Props> = ({
                 characterAvatar={character?.avatar}
                 index={idx}
                 isLast={idx === messages.length - 1}
-                isPlotMode={isPlotMode}
+                isPlotMode={conversation.plotMode}
                 siblingVersions={siblingVersions}
                 activeVersionIndex={activeVersionIndex}
                 onSwitchVersion={onSwitchVersion ? handleSwitchVersion : undefined}
                 // AI 消息：回溯重写
                 onBranchFrom={msg.role === 'assistant' && onClearAfterMessage ? handleBranchFrom : undefined}
-                // 用户消息：仅剧情模式 + 非首条时显示回溯
-                onBranchFromUser={
-                  msg.role === 'user' && isPlotMode && !isFirstUserMessage && onClearFromMessage
-                    ? handleBranchFromUser
-                    : undefined
-                }
+                // 用户消息：所有模式均可回溯（非流式时）
+                onBranchFromUser={canUserBranch && !isStreaming ? handleBranchFromUser : undefined}
                 onRegenerate={msg.role === 'assistant' && idx === messages.length - 1 && !isStreaming ? handleRegenerateLast : undefined}
                 onEdit={(newContent) => {
                   if (!isStreaming) {
@@ -865,6 +866,7 @@ export const ChatView: React.FC<Props> = ({
         }}
       >
         <InputArea
+          ref={inputRef}
           onSend={onSend}
           onStop={onStop}
           isStreaming={isStreaming}

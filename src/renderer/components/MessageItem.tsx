@@ -415,13 +415,13 @@ export const MessageItem: React.FC<Props> = ({
                       }
                       label="复制"
                     />
-                    {/* 剧情模式：用户消息回溯按钮 */}
+                    {/* 用户消息回溯按钮 — 所有模式通用 */}
                     {onBranchFromUser && (
                       <>
                         <span className="w-px h-3 mx-1" style={{ background: 'var(--hairline-strong)' }} />
                         <ActionButton
                           onClick={() => {
-                            if (window.confirm('回溯到这条消息将清空之后的所有对话记录和 AI 记忆，从这条消息重新开始。是否继续？')) {
+                            if (window.confirm('回溯后这条用户消息及其之后的所有对话记录与 AI 记忆将被清空，原文会自动回到输入框中供你修改后重新发送。是否继续？')) {
                               onBranchFromUser(message.id);
                             }
                           }}

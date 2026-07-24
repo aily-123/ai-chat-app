@@ -1,5 +1,12 @@
-import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import React, { useState, useRef, useEffect, KeyboardEvent, forwardRef, useImperativeHandle } from 'react';
 import { KbdGlowGroup } from './KeyboardShine';
+
+export interface InputAreaHandle {
+  /** 从外部设置输入框内容（用于回溯后把用户原句回填到输入框） */
+  setValue: (text: string) => void;
+  /** 聚焦输入框 */
+  focus: () => void;
+}
 
 interface Props {
   onSend: (content: string) => void;
@@ -15,7 +22,7 @@ interface Props {
   onToggleWebSearch?: () => void;
 }
 
-export const InputArea: React.FC<Props> = ({
+export const InputArea = forwardRef<InputAreaHandle, Props>(function InputArea({
   onSend,
   onStop,
   isStreaming,
@@ -25,10 +32,35 @@ export const InputArea: React.FC<Props> = ({
   placeholder,
   webSearchEnabled,
   onToggleWebSearch,
-}) => {
+}, ref) {
   const [input, setInput] = useState('');
   const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 暴露给父组件的能力：外部回填输入值
+  useImperativeHandle(ref, () => ({
+    setValue: (text: string) => {
+      setInput(text);
+      // 触发高度自适应
+      requestAnimationFrame(() => {
+        const ta = textareaRef.current;
+        if (ta) {
+          ta.style.height = 'auto';
+          ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+        }
+        // 聚焦以便用户立即编辑
+        ta?.focus();
+        // 把光标移到末尾
+        if (ta) {
+          const len = ta.value.length;
+          ta.setSelectionRange(len, len);
+        }
+      });
+    },
+    focus: () => {
+      textareaRef.current?.focus();
+    },
+  }), []);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -225,4 +257,4 @@ export const InputArea: React.FC<Props> = ({
       </div>
     </div>
   );
-};
+});
