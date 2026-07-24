@@ -81,6 +81,25 @@ public class ConversationService {
         return false;
     }
 
+    /**
+     * 重置对话：清空所有消息 + 清空 AI 记忆（保留对话本身和剧情设定）
+     */
+    @Transactional
+    public Optional<ConversationEntity> reset(String id) {
+        String userId = UserContext.require();
+        return conversationRepository.findByIdAndUserId(id, userId).map(existing -> {
+            // 删除所有消息
+            messageRepository.deleteByConversationId(id);
+            // 清空 AI 记忆
+            existing.setMemoryFacts(null);
+            existing.setMemorySummary(null);
+            existing.setMemorySummaryUpTo(0);
+            existing.setMemoryCheckpointMsgId(null);
+            existing.setUpdatedAt(System.currentTimeMillis());
+            return conversationRepository.save(existing);
+        });
+    }
+
     /** 校验当前用户是否拥有该对话 */
     public boolean verifyOwnership(String conversationId) {
         String userId = UserContext.require();

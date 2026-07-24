@@ -53,6 +53,9 @@ interface ChatState {
 
   // 刷新对话标题（根据第一条用户消息自动设置）
   autoTitle: (conversationId: string) => Promise<void>;
+
+  /** 重置对话：清空所有消息 + 清空 AI 记忆，重新开始 */
+  resetConversation: (id: string) => Promise<void>;
 }
 
 // 获取API实例
@@ -302,5 +305,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
       await api.conversations.update(conversationId, { title });
       await get().loadConversations();
     }
+  },
+
+  /** 重置对话：清空所有消息 + 清空 AI 记忆，重新开始 */
+  resetConversation: async (id: string) => {
+    const api = getApi();
+    await api.conversations.reset(id);
+    // 清空前端消息状态
+    set({ messages: [], allMessages: [], messagesLoaded: true });
+    // 刷新对话列表（更新记忆字段）
+    await get().loadConversations();
   },
 }));

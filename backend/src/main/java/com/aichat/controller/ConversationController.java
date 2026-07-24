@@ -47,4 +47,14 @@ public class ConversationController {
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.notFound().build();
     }
+
+    /**
+     * 重置对话：清空所有消息 + 清空 AI 记忆，保留对话本身和剧情设定
+     */
+    @PostMapping("/{id}/reset")
+    public ResponseEntity<ConversationEntity> reset(@PathVariable String id) {
+        return conversationService.reset(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

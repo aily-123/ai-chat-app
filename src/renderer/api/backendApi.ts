@@ -105,6 +105,9 @@ export const backendApi = {
 
     delete: (id: string): Promise<boolean> =>
       request(`/conversations/${id}`, { method: 'DELETE' }),
+
+    reset: (id: string): Promise<Conversation> =>
+      request(`/conversations/${id}/reset`, { method: 'POST' }),
   },
 
   messages: {

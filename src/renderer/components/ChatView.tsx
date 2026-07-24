@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { MessageItem } from './MessageItem';
 import { InputArea, type InputAreaHandle } from './InputArea';
 import { BackgroundPanel } from './BackgroundPanel';
@@ -34,6 +35,8 @@ interface Props {
   onClearFromMessage?: (messageId: string) => Promise<void>;
   /** 删除该 AI 消息及之后所有消息，并清空 AI 记忆（用于重写 AI 回复） */
   onClearAfterMessage?: (messageId: string) => Promise<void>;
+  /** 重置对话：清空所有消息 + AI 记忆，重新开始 */
+  onResetConversation?: (id: string) => Promise<void>;
 }
 
 export const ChatView: React.FC<Props> = ({
@@ -58,6 +61,7 @@ export const ChatView: React.FC<Props> = ({
   onBranchFrom,
   onClearFromMessage,
   onClearAfterMessage,
+  onResetConversation,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -65,6 +69,7 @@ export const ChatView: React.FC<Props> = ({
   const [showBgPanel, setShowBgPanel] = useState(false);
   const [showPlotPanel, setShowPlotPanel] = useState(false);
   const [showMemoryPanel, setShowMemoryPanel] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -220,6 +225,12 @@ export const ChatView: React.FC<Props> = ({
       handleBranchFrom(lastAssistant.id);
     }
   }, [messages, isStreaming, handleBranchFrom]);
+
+  const handleReset = useCallback(async () => {
+    if (!conversation || !onResetConversation) return;
+    setShowResetConfirm(false);
+    await onResetConversation(conversation.id);
+  }, [conversation, onResetConversation]);
 
   if (!conversation) {
     return (
@@ -652,6 +663,17 @@ export const ChatView: React.FC<Props> = ({
             </svg>
             <span className="hidden md:inline">记忆</span>
           </button>
+          <span className="w-px h-4 mx-1" style={{ background: 'var(--hairline-strong)' }} />
+          <button
+            onClick={() => setShowResetConfirm(true)}
+            className="group flex items-center gap-2 px-3 py-1.5 text-[11.5px] tracking-wider text-[var(--muted)] hover:text-[var(--accent)] transition-quick"
+            title="重新开始对话"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
+            </svg>
+            <span className="hidden md:inline">重新开始</span>
+          </button>
         </div>
       </header>
 
@@ -933,6 +955,45 @@ export const ChatView: React.FC<Props> = ({
           onRegenerateMemory={onRegenerateMemory}
           onClose={() => setShowMemoryPanel(false)}
         />
+      )}
+
+      {/* 重新开始确认对话框 */}
+      {showResetConfirm && createPortal(
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-veil fade-in"
+          onClick={() => setShowResetConfirm(false)}
+        >
+          <div
+            className="editorial-card w-full max-w-sm overflow-hidden rounded-md cinematic-rise"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 pt-6 pb-5">
+              <div className="eyebrow eyebrow-accent mb-2">确认操作</div>
+              <h3 className="font-display text-[20px] font-light tracking-[-0.015em] mb-2" style={{ color: 'var(--ink)' }}>
+                重新开始对话
+              </h3>
+              <p className="text-[13px] leading-[1.7]" style={{ color: 'var(--muted)' }}>
+                这将清空当前对话的所有消息和 AI 记忆，对话将从零开始。剧情设定和角色设定将保留。
+              </p>
+            </div>
+            <div className="px-6 py-3 hairline-t flex justify-end gap-2">
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="tactile-ghost press-shrink text-[13px]"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleReset}
+                className="tactile press-shrink text-[13px]"
+                style={{ color: 'var(--paper)' }}
+              >
+                <span>确认重置</span>
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </main>
   );

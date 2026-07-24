@@ -39,6 +39,7 @@ const App: React.FC = () => {
     switchVersion,
     clearFromMessage,
     clearAfterMessage,
+    resetConversation,
   } = useChatStore();
 
   const { settings, loaded: settingsLoaded, load: loadSettings, update: updateSettings } = useSettingsStore();
@@ -284,6 +285,7 @@ const App: React.FC = () => {
         onBranchFrom={branchFromMessage}
         onClearFromMessage={clearFromMessage}
         onClearAfterMessage={clearAfterMessage}
+        onResetConversation={resetConversation}
       />
 
       {showSettings && (
