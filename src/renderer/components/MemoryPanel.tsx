@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import type { Conversation } from '../../shared/types';
 
 interface Props {
@@ -80,7 +81,7 @@ export const MemoryPanel: React.FC<Props> = ({
   const factsCategories = parseFacts(memoryFacts);
   const totalFacts = Object.values(factsCategories).reduce((sum, arr) => sum + arr.length, 0);
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-veil fade-in"
       onClick={onClose}
@@ -408,6 +409,7 @@ export const MemoryPanel: React.FC<Props> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSettingsStore } from '../store/settingsStore';
 import { useCharacterStore } from '../store/characterStore';
 import { generateBackgroundImage } from '../services/backgroundImage';
@@ -269,7 +270,7 @@ export const BackgroundPanel: React.FC<Props> = ({
     return val;
   };
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-veil fade-in"
       onClick={onClose}
@@ -689,6 +690,7 @@ export const BackgroundPanel: React.FC<Props> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

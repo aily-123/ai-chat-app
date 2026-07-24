@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useCharacterStore } from '../store/characterStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { generateCharacterLore } from '../services/characterLore';
@@ -188,7 +189,7 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
     c.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center backdrop-veil p-4 fade-in"
       onClick={onClose}
@@ -875,7 +876,8 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

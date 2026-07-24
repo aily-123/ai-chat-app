@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import type { AppSettings, User } from '../../shared/types';
 import { compressImage } from '../lib/utils';
 
@@ -179,7 +180,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
 
   const activeSectionData = sections.find((s) => s.id === activeSection);
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-veil fade-in"
       onClick={onClose}
@@ -1060,7 +1061,8 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
