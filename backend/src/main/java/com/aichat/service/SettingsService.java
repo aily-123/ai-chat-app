@@ -2,6 +2,7 @@ package com.aichat.service;
 
 import com.aichat.entity.SettingsEntity;
 import com.aichat.repository.SettingsRepository;
+import com.aichat.security.UserContext;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,8 +16,10 @@ public class SettingsService {
         this.settingsRepository = settingsRepository;
     }
 
+    /** 仅返回当前用户的设置 */
     public Map<String, String> getAll() {
-        List<SettingsEntity> all = settingsRepository.findAll();
+        String userId = UserContext.require();
+        List<SettingsEntity> all = settingsRepository.findByUserId(userId);
         Map<String, String> result = new LinkedHashMap<>();
         for (SettingsEntity s : all) {
             result.put(s.getSettingKey(), s.getSettingValue());
@@ -25,12 +28,16 @@ public class SettingsService {
     }
 
     public Optional<String> get(String key) {
-        return settingsRepository.findBySettingKey(key).map(SettingsEntity::getSettingValue);
+        String userId = UserContext.require();
+        return settingsRepository.findByUserIdAndSettingKey(userId, key)
+                .map(SettingsEntity::getSettingValue);
     }
 
     public void set(String key, String value) {
-        SettingsEntity entity = settingsRepository.findBySettingKey(key)
-                .orElse(new SettingsEntity(UUID.randomUUID().toString(), key, value));
+        String userId = UserContext.require();
+        SettingsEntity entity = settingsRepository
+                .findByUserIdAndSettingKey(userId, key)
+                .orElse(new SettingsEntity(UUID.randomUUID().toString(), userId, key, value));
         entity.setSettingValue(value);
         settingsRepository.save(entity);
     }

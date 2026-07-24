@@ -2,6 +2,7 @@ package com.aichat.service;
 
 import com.aichat.entity.CharacterEntity;
 import com.aichat.repository.CharacterRepository;
+import com.aichat.security.UserContext;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,15 +18,20 @@ public class CharacterService {
         this.characterRepository = characterRepository;
     }
 
+    /** 仅返回当前用户拥有的角色 */
     public List<CharacterEntity> getAll() {
-        return characterRepository.findAll();
+        String userId = UserContext.require();
+        return characterRepository.findByUserId(userId);
     }
 
     public Optional<CharacterEntity> getById(String id) {
-        return characterRepository.findById(id);
+        String userId = UserContext.require();
+        return characterRepository.findByIdAndUserId(id, userId);
     }
 
     public CharacterEntity create(CharacterEntity character) {
+        // 自动注入当前用户 ID
+        character.setUserId(UserContext.require());
         character.setId(UUID.randomUUID().toString());
         long now = System.currentTimeMillis();
         if (character.getCreatedAt() == null) character.setCreatedAt(now);
@@ -34,7 +40,8 @@ public class CharacterService {
     }
 
     public Optional<CharacterEntity> update(String id, CharacterEntity updates) {
-        return characterRepository.findById(id).map(existing -> {
+        String userId = UserContext.require();
+        return characterRepository.findByIdAndUserId(id, userId).map(existing -> {
             if (updates.getName() != null) existing.setName(updates.getName());
             if (updates.getAvatar() != null) existing.setAvatar(updates.getAvatar());
             if (updates.getDescription() != null) existing.setDescription(updates.getDescription());
@@ -53,7 +60,9 @@ public class CharacterService {
     }
 
     public boolean delete(String id) {
-        if (characterRepository.existsById(id)) {
+        String userId = UserContext.require();
+        Optional<CharacterEntity> existing = characterRepository.findByIdAndUserId(id, userId);
+        if (existing.isPresent()) {
             characterRepository.deleteById(id);
             return true;
         }

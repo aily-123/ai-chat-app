@@ -3,20 +3,23 @@ import { Sidebar } from './components/Sidebar';
 import { ChatView } from './components/ChatView';
 import { SettingsPanel } from './components/SettingsPanel';
 import { CharacterPanel } from './components/CharacterPanel';
+import { AuthPage } from './components/AuthPage';
 import { LandingIndex } from './components/landing/Index';
 import { useChatStore } from './store/chatStore';
 import { useSettingsStore } from './store/settingsStore';
 import { useCharacterStore } from './store/characterStore';
+import { useAuthStore } from './store/authStore';
 import { useStreamChat } from './hooks/useStreamChat';
 import type { CreateConversationParams } from '../shared/types';
 
 const App: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showCharacters, setShowCharacters] = useState(false);
-  // Landing is the first screen users see. From there the only way forward
-  // is into the chat. Once inside the chat, there is no path back.
   const [appLaunched, setAppLaunched] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // 鉴权
+  const auth = useAuthStore();
 
   // 全局状态
   const {
@@ -72,12 +75,19 @@ const App: React.FC = () => {
     },
   });
 
-  // 首次加载
+  // 启动时尝试自动登录
   useEffect(() => {
-    loadConversations();
-    loadSettings();
-    loadCharacters();
+    auth.bootstrap();
   }, []);
+
+  // 登录态变化时，加载该用户的数据
+  useEffect(() => {
+    if (auth.bootstrapped && auth.user) {
+      loadConversations();
+      loadSettings();
+      loadCharacters();
+    }
+  }, [auth.bootstrapped, auth.user]);
 
   // 主题切换
   useEffect(() => {
@@ -95,11 +105,7 @@ const App: React.FC = () => {
     }
   }, [conversationsLoaded]);
 
-  // 背景由 ChatView 自己渲染（对话级 background 优先，回退到全局 wallpaper）
-  // 这里不再渲染冗余的全局背景层，避免与 ChatView 的背景层重叠导致"旧背景残留"视觉问题
-
   const handleCreate = useCallback(async (characterId?: string) => {
-    // 如果指定了角色，从角色数据中复制背景到新对话
     let backgroundParams: Partial<CreateConversationParams> = {};
     if (characterId) {
       const character = characters.find(c => c.id === characterId);
@@ -114,6 +120,7 @@ const App: React.FC = () => {
     }
     const conv = await createConversation({ model: settings.model, characterId, ...backgroundParams });
     selectConversation(conv.id);
+    return conv;
   }, [createConversation, selectConversation, settings.model, characters]);
 
   const handleSelect = useCallback(
@@ -141,11 +148,9 @@ const App: React.FC = () => {
 
   const handleSend = useCallback(
     (content: string, options?: { parentMessageId?: string | null; branchMode?: boolean }) => {
-      // 如果还没有活跃对话，自动创建一个
       if (!activeConversationId) {
         createConversation({ model: settings.model }).then((conv) => {
           selectConversation(conv.id).then(() => {
-            // 需要在下一次渲染后才能发送
             setTimeout(() => sendMessage(content, options), 100);
           });
         });
@@ -156,19 +161,39 @@ const App: React.FC = () => {
     [activeConversationId, createConversation, selectConversation, sendMessage, settings.model]
   );
 
-  // SENTINEL landing page is the first thing users see.
-  // "Enter Studio" dismisses it and reveals the chat experience.
-  // One-way flow: Landing → Chat. There is no back-button.
+  // ===== 路由逻辑 =====
+  // 1) 启动中
+  if (!auth.bootstrapped) {
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-5">
+          <div className="flex items-center gap-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: '0ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: '180ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" style={{ animationDelay: '360ms' }} />
+          </div>
+          <div className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground">Composing</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 2) 未登录 — 显示登录/注册页
+  if (!auth.user) {
+    return <AuthPage />;
+  }
+
+  // 3) 已登录 — Landing 页（一键进入工作台）
   if (!appLaunched) {
     return <LandingIndex onLaunchApp={() => setAppLaunched(true)} />;
   }
 
+  // 4) 主工作台
   return (
     <div
       className="h-full flex relative"
       style={{ background: 'var(--paper)' }}
     >
-      {/* Initial loading skeleton — elegant paper-style */}
       {!conversationsLoaded || !settingsLoaded ? (
         <div className="absolute inset-0 z-50 flex items-center justify-center" style={{ background: 'var(--paper)' }}>
           <div className="flex flex-col items-center gap-5 fade-in">
@@ -184,9 +209,6 @@ const App: React.FC = () => {
           </div>
         </div>
       ) : null}
-
-      {/* 背景由 ChatView 内部渲染（对话级 background 优先，回退到全局 wallpaper），
-          不再在此处渲染冗余的全局背景层，避免双层重叠导致背景替换时旧背景残留 */}
 
       {/* 移动端顶部导航栏 */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-2.5 hairline-b" style={{ background: 'var(--surface)' }}>
@@ -213,7 +235,6 @@ const App: React.FC = () => {
         </button>
       </div>
 
-      {/* 移动端侧边栏遮罩 */}
       {mobileSidebarOpen && (
         <div
           className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm fade-in"
@@ -221,7 +242,6 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* 左侧边栏 */}
       <Sidebar
         conversations={conversations}
         activeId={activeConversationId}
@@ -231,11 +251,15 @@ const App: React.FC = () => {
         onRename={handleRename}
         onOpenSettings={() => { setShowSettings(true); setMobileSidebarOpen(false); }}
         onOpenCharacters={() => { setShowCharacters(true); setMobileSidebarOpen(false); }}
+        onLogout={async () => {
+          await auth.logout();
+          setAppLaunched(false);
+        }}
+        currentUser={auth.user}
         mobileOpen={mobileSidebarOpen}
         onCloseMobile={() => setMobileSidebarOpen(false)}
       />
 
-      {/* 中间聊天区域 */}
       <ChatView
         conversation={activeConversation}
         messages={messages}
@@ -262,22 +286,41 @@ const App: React.FC = () => {
         onClearAfterMessage={clearAfterMessage}
       />
 
-      {/* 设置弹窗 — SettingsPanel 自身渲染全屏 overlay */}
       {showSettings && (
         <SettingsPanel
           settings={settings}
           onUpdate={updateSettings}
           onClose={() => setShowSettings(false)}
+          onLogout={async () => {
+            await auth.logout();
+            setAppLaunched(false);
+          }}
+          currentUser={auth.user}
         />
       )}
 
-      {/* 角色管理弹窗 — CharacterPanel 自身渲染全屏 overlay */}
       {showCharacters && (
         <CharacterPanel
           onClose={() => setShowCharacters(false)}
-          onStartChat={(characterId) => {
-            handleCreate(characterId);
+          onStartChat={async (characterId) => {
+            const conv = await handleCreate(characterId);
             setShowCharacters(false);
+            // 自动将开场白作为对话首条助手消息（无论是否剧情模式）
+            if (conv) {
+              const character = characters.find(c => c.id === characterId);
+              if (character && character.greeting && character.greeting.trim()) {
+                try {
+                  await saveMessage({
+                    role: 'assistant',
+                    content: character.greeting.trim(),
+                    parentMessageId: null,
+                    isActiveVersion: true,
+                  });
+                } catch (err) {
+                  console.error('Failed to save greeting as first message:', err);
+                }
+              }
+            }
           }}
         />
       )}

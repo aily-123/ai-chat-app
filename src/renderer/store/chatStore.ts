@@ -234,8 +234,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
   /**
    * 清空式回溯（剧情模式用户消息回溯专用）：
    * - 物理删除该消息本身及其之后的所有消息
-   * - 清空 AI 记忆（memoryFacts / memorySummary / memorySummaryUpTo）
+   * - 清空 AI 记忆（memoryFacts / memorySummary / memorySummaryUpTo / memoryCheckpointMsgId）
    * - 由调用方再调用 sendMessage(content) 重新发送该消息
+   *
+   * 记忆回退策略：完全清空，让 AI 从该消息开始重建记忆
+   * - 因为 memorySummaryUpTo 是基于"消息数量"索引的，无法只回退到该消息之前
+   * - 最简单可靠的做法是清空所有记忆，让 AI 在新对话中重新建立
    */
   clearFromMessage: async (messageId: string) => {
     const { activeConversationId } = get();
@@ -246,11 +250,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
       await api.messages.deleteFromMessage(activeConversationId, messageId);
     }
 
-    // 清空 AI 记忆：关键事实清单 + 长期摘要
+    // 清空 AI 记忆：关键事实清单 + 长期摘要 + 记忆点
+    // 这样后续对话中 AI 将从零开始重建记忆，完全反映回溯后的语境
     await api.conversations.update(activeConversationId, {
       memoryFacts: '',
       memorySummary: '',
       memorySummaryUpTo: 0,
+      memoryCheckpointMsgId: '',
     });
 
     await get().loadMessages(activeConversationId);
@@ -279,6 +285,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       memoryFacts: '',
       memorySummary: '',
       memorySummaryUpTo: 0,
+      memoryCheckpointMsgId: '',
     });
 
     await get().loadMessages(activeConversationId);

@@ -9,16 +9,39 @@ import type {
   CreateCharacterParams,
   UpdateCharacterParams,
   SavedBackground,
+  User,
+  AuthResponse,
 } from '../../shared/types';
 import { DEFAULT_SETTINGS } from '../../shared/types';
+import { authStorage } from '../store/authStorage';
 
 const BASE = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_BASE_URL) || '/api';
 
+/**
+ * 401 Unauthorized 时由前端触发的回调 — 用来让 authStore 切回未登录状态
+ */
+let onUnauthorized: (() => void) | null = null;
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  onUnauthorized = handler;
+}
+
+function authHeaders(): Record<string, string> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const token = authStorage.getToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
+}
+
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${url}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers: { ...authHeaders(), ...(options?.headers || {}) },
   });
+  if (res.status === 401) {
+    if (onUnauthorized) onUnauthorized();
+    const text = await res.text().catch(() => '');
+    throw new Error(`HTTP 401: ${text || '需要登录'}`);
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`);
@@ -29,9 +52,13 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 /** 不解析 JSON 的请求（用于 void 返回） */
 async function requestNoBody(url: string, options?: RequestInit): Promise<void> {
   const res = await fetch(`${BASE}${url}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers: { ...authHeaders(), ...(options?.headers || {}) },
   });
+  if (res.status === 401) {
+    if (onUnauthorized) onUnauthorized();
+    throw new Error('HTTP 401: 需要登录');
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`);
@@ -39,6 +66,30 @@ async function requestNoBody(url: string, options?: RequestInit): Promise<void> 
 }
 
 export const backendApi = {
+  auth: {
+    /** 当数据库无任何用户时，自动创建 admin 账号并登录 */
+    anonBootstrap: (): Promise<AuthResponse> =>
+      request('/auth/anon-bootstrap', { method: 'POST' }),
+
+    login: (username: string, password: string): Promise<AuthResponse> =>
+      request('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password }),
+      }),
+
+    register: (username: string, password: string, displayName?: string): Promise<AuthResponse> =>
+      request('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ username, password, displayName }),
+      }),
+
+    logout: (): Promise<void> =>
+      requestNoBody('/auth/logout', { method: 'POST' }),
+
+    me: (): Promise<User> =>
+      request('/auth/me'),
+  },
+
   conversations: {
     list: (): Promise<Conversation[]> =>
       request('/conversations'),

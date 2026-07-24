@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { Conversation } from '../../shared/types';
+import type { Conversation, User } from '../../shared/types';
 import { useScrollReveal } from '../hooks/useDynamicAnimations';
 
 interface Props {
@@ -11,6 +11,10 @@ interface Props {
   onRename: (id: string, title: string) => void;
   onOpenSettings: () => void;
   onOpenCharacters: () => void;
+  /** 登出回调 */
+  onLogout?: () => void | Promise<void>;
+  /** 当前登录用户（用于显示用户名） */
+  currentUser?: User | null;
   /** 移动端侧边栏是否打开 */
   mobileOpen?: boolean;
   /** 关闭移动端侧边栏 */
@@ -26,6 +30,8 @@ export const Sidebar: React.FC<Props> = ({
   onRename,
   onOpenSettings,
   onOpenCharacters,
+  onLogout,
+  currentUser,
   mobileOpen,
   onCloseMobile,
 }) => {
@@ -403,6 +409,40 @@ export const Sidebar: React.FC<Props> = ({
 
       {/* Footer masthead */}
       <div className="hairline-t px-5 py-2.5 space-y-0.5">
+        {currentUser && (
+          <div className="flex items-center justify-between pb-1.5 mb-1.5 hairline-b">
+            <div className="flex items-center gap-2 min-w-0">
+              <div
+                className="w-6 h-6 rounded-full flex items-center justify-center font-display text-[11px] font-medium flex-shrink-0"
+                style={{ background: 'var(--ink)', color: 'var(--paper)' }}
+              >
+                {currentUser.displayName?.charAt(0).toUpperCase() || currentUser.username.charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <div className="text-[11.5px] font-medium truncate" style={{ color: 'var(--ink)' }}>
+                  {currentUser.displayName || currentUser.username}
+                </div>
+                <div className="text-[9.5px] tracking-wide truncate" style={{ color: 'var(--muted-2)' }}>
+                  @{currentUser.username}
+                </div>
+              </div>
+            </div>
+            {onLogout && (
+              <button
+                onClick={() => {
+                  if (window.confirm('确定要登出当前账号？')) {
+                    onLogout();
+                  }
+                }}
+                className="text-[9.5px] tracking-wider uppercase px-1.5 py-0.5 hairline hover:bg-[var(--paper-2)] transition-quick flex-shrink-0"
+                style={{ color: 'var(--muted)', borderRadius: 2 }}
+                title="登出"
+              >
+                登出
+              </button>
+            )}
+          </div>
+        )}
         <button
           onClick={onOpenCharacters}
           className="group w-full flex items-center justify-between py-1.5 text-[var(--ink)] transition-quick"

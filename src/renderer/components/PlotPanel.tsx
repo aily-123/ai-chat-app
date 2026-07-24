@@ -108,6 +108,8 @@ export const PlotPanel: React.FC<Props> = ({
   const [plotMode, setPlotMode] = useState(conversation.plotMode);
   const [plotSetting, setPlotSetting] = useState(conversation.plotSetting);
   const [plotProgress, setPlotProgress] = useState(conversation.plotProgress);
+  const [worldBook, setWorldBook] = useState(conversation.worldBook || '');
+  const [characterStatus, setCharacterStatus] = useState(conversation.characterStatus || '');
 
   // 检查是否需要自动发送开场白
   const shouldSendGreeting = (
@@ -124,7 +126,13 @@ export const PlotPanel: React.FC<Props> = ({
 
   const handleApply = async () => {
     try {
-      onUpdate({ plotSetting, plotProgress, plotMode });
+      onUpdate({
+        plotSetting,
+        plotProgress,
+        plotMode,
+        worldBook,
+        characterStatus,
+      });
       // 如果满足条件，自动发送开场白
       if (shouldSendGreeting) {
         await onSaveGreeting(characterGreeting!);
@@ -286,11 +294,67 @@ export const PlotPanel: React.FC<Props> = ({
             </div>
           </div>
 
+          {/* 世界书 — 补充设定（地名/物品/规则/背景板） */}
+          <div>
+            <div className="hairline-ticker mb-4">
+              <span>D · 世界书</span>
+              <span>随时补充</span>
+            </div>
+            <p className="text-[11.5px] leading-[1.65] mb-3" style={{ color: 'var(--muted)' }}>
+              世界观补充资料 — 每行一条词条。AI 会在每次回复时优先参考这些内容（地点、物品、规则、历史背景等）。
+            </p>
+            <textarea
+              value={worldBook}
+              onChange={(e) => setWorldBook(e.target.value)}
+              rows={6}
+              className="w-full px-4 py-3 text-[13.5px] leading-[1.75] hairline bg-transparent focus:outline-none focus:border-[var(--ink-2)] glow-on-focus transition-quick resize-none font-mono-ui"
+              style={{ color: 'var(--ink)', borderRadius: 4 }}
+              placeholder={`每行一条词条，AI 会自动遵守。
+
+示例：
+- 暮色森林：一片被诅咒的森林，月圆之夜会传出歌声
+- 银月之刃：主角继承的家族圣剑，能斩断一切魔法
+- 教会铁律：不可在城内使用任何火系魔法
+- 货币系统：1 金币 = 100 银币 = 10000 铜币`}
+            />
+            <div className="mt-1.5 flex items-center justify-end text-[10.5px] tracking-wider" style={{ color: 'var(--muted-2)' }}>
+              <span className="numeric-badge">{String(worldBook.split('\n').filter(l => l.trim()).length).padStart(3, '0')} 条</span>
+            </div>
+          </div>
+
+          {/* 人物状态 — 人物位置、物品、关系变化 */}
+          <div>
+            <div className="hairline-ticker mb-4">
+              <span>E · 人物状态</span>
+              <span>动态维护</span>
+            </div>
+            <p className="text-[11.5px] leading-[1.65] mb-3" style={{ color: 'var(--muted)' }}>
+              追踪角色状态变化 — 位置、持有物品、情感关系、健康值等。AI 会主动维护此清单，确保剧情连贯。
+            </p>
+            <textarea
+              value={characterStatus}
+              onChange={(e) => setCharacterStatus(e.target.value)}
+              rows={6}
+              className="w-full px-4 py-3 text-[13.5px] leading-[1.75] hairline bg-transparent focus:outline-none focus:border-[var(--ink-2)] glow-on-focus transition-quick resize-none font-mono-ui"
+              style={{ color: 'var(--ink)', borderRadius: 4 }}
+              placeholder={`每行一条状态，可用 [角色] 前缀分类。
+
+示例：
+[林夕] 当前位置：暮色森林边缘 | 状态：轻伤 | 装备：银月之刃、皮甲
+[林夕] 关系：与艾琳是青梅竹马（好感度 80/100）
+[艾琳] 当前位置：安全屋 | 状态：健康 | 持有：神秘信件
+[林夕] 已解锁技能：初级剑术、初级治疗术`}
+            />
+            <div className="mt-1.5 flex items-center justify-end text-[10.5px] tracking-wider" style={{ color: 'var(--muted-2)' }}>
+              <span className="numeric-badge">{String(characterStatus.split('\n').filter(l => l.trim()).length).padStart(3, '0')} 条</span>
+            </div>
+          </div>
+
           {/* 提示 */}
           <div className="p-5 hairline relative">
             <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: 'var(--accent)' }} />
             <div className="flex items-baseline gap-2 mb-3">
-              <span className="eyebrow eyebrow-accent">D · 提示</span>
+              <span className="eyebrow eyebrow-accent">F · 提示</span>
               <span className="numeric-badge">DIRECTOR'S NOTE</span>
             </div>
             <ul className="text-[12.5px] space-y-2 pl-0 list-none" style={{ color: 'var(--ink-2)' }}>
@@ -304,10 +368,14 @@ export const PlotPanel: React.FC<Props> = ({
               </li>
               <li className="flex items-start gap-3">
                 <span className="numeric-badge pt-1 flex-shrink-0">03</span>
-                <span>长期对话会自动压缩早期记忆，但剧情设定永久保留</span>
+                <span>世界书与人物状态会注入 system prompt，确保 AI 严格遵守</span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="numeric-badge pt-1 flex-shrink-0">04</span>
+                <span>长期对话会自动压缩早期记忆，但剧情设定永久保留</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="numeric-badge pt-1 flex-shrink-0">05</span>
                 <span>每次回复结尾 AI 会给出剧情走向建议</span>
               </li>
             </ul>

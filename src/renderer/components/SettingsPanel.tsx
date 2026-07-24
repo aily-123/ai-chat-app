@@ -1,11 +1,15 @@
 import React, { useState, useRef } from 'react';
-import type { AppSettings } from '../../shared/types';
+import type { AppSettings, User } from '../../shared/types';
 import { compressImage } from '../lib/utils';
 
 interface Props {
   settings: AppSettings;
   onUpdate: (partial: Partial<AppSettings>) => void;
   onClose: () => void;
+  /** 登出回调 */
+  onLogout?: () => void | Promise<void>;
+  /** 当前登录用户 */
+  currentUser?: User | null;
 }
 
 type Section = 'api' | 'model' | 'appearance' | 'wallpaper' | 'about';
@@ -61,7 +65,7 @@ const FEATURES = [
   { name: '独立背景', en: 'Backdrop', desc: '每个对话的氛围' },
 ];
 
-export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose }) => {
+export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, onLogout, currentUser }) => {
   const [wallpaperPreview, setWallpaperPreview] = useState(settings.wallpaper);
   const [activeSection, setActiveSection] = useState<Section>('api');
   const [isUploading, setIsUploading] = useState(false);

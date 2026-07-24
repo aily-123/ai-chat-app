@@ -11,6 +11,10 @@ public class CharacterEntity {
     @Column(length = 36)
     private String id;
 
+    /** 所属用户 ID — 用于用户隔离 */
+    @Column(name = "user_id", length = 36)
+    private String userId;
+
     @Column(nullable = false, length = 255)
     private String name;
 
@@ -55,9 +59,10 @@ public class CharacterEntity {
 
     public CharacterEntity() {}
 
-    // Getters & Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getAvatar() { return avatar; }

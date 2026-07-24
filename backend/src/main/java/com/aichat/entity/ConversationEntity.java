@@ -11,6 +11,10 @@ public class ConversationEntity {
     @Column(length = 36)
     private String id;
 
+    /** 所属用户 ID — 用于用户隔离 */
+    @Column(name = "user_id", length = 36)
+    private String userId;
+
     @Column(length = 255)
     private String title = "新对话";
 
@@ -44,6 +48,18 @@ public class ConversationEntity {
     @Column(name = "plot_progress", columnDefinition = "TEXT")
     private String plotProgress;
 
+    /** 世界书（剧情模式下生效，可包含多条独立词条） */
+    @Column(name = "world_book", columnDefinition = "TEXT")
+    private String worldBook;
+
+    /** 剧情人物状态（JSON 或纯文本：人物、地点、物品、关系） */
+    @Column(name = "character_status", columnDefinition = "TEXT")
+    private String characterStatus;
+
+    /** 上次自动保存的记忆点（消息 ID），回溯到此消息之前时记忆重置 */
+    @Column(name = "memory_checkpoint_msg_id", length = 36)
+    private String memoryCheckpointMsgId;
+
     @Column(name = "memory_summary", columnDefinition = "TEXT")
     private String memorySummary;
 
@@ -63,6 +79,8 @@ public class ConversationEntity {
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getModel() { return model; }
@@ -85,6 +103,12 @@ public class ConversationEntity {
     public void setPlotSetting(String plotSetting) { this.plotSetting = plotSetting; }
     public String getPlotProgress() { return plotProgress; }
     public void setPlotProgress(String plotProgress) { this.plotProgress = plotProgress; }
+    public String getWorldBook() { return worldBook; }
+    public void setWorldBook(String worldBook) { this.worldBook = worldBook; }
+    public String getCharacterStatus() { return characterStatus; }
+    public void setCharacterStatus(String characterStatus) { this.characterStatus = characterStatus; }
+    public String getMemoryCheckpointMsgId() { return memoryCheckpointMsgId; }
+    public void setMemoryCheckpointMsgId(String memoryCheckpointMsgId) { this.memoryCheckpointMsgId = memoryCheckpointMsgId; }
     public String getMemorySummary() { return memorySummary; }
     public void setMemorySummary(String memorySummary) { this.memorySummary = memorySummary; }
     public Integer getMemorySummaryUpTo() { return memorySummaryUpTo; }

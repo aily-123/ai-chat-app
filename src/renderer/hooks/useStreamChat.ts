@@ -30,6 +30,7 @@ const getApi = () => {
 // 长期记忆压缩阈值：超过这个数量开始触发摘要
 const SUMMARIZE_THRESHOLD = 12; // 降低阈值，让记忆更早工作（原为 16）
 const KEEP_RECENT = 6; // 保留最近 6 条原文（原为 10）
+const INITIAL_FACT_THRESHOLD = 4; // 第一次提取关键事实的消息数阈值（之前的逻辑要 12 条才开始）
 
 // 生成角色系统提示词 - 强化版（含防 OOC 铁律）
 function generateCharacterSystemPrompt(character: Character): string {
@@ -128,6 +129,18 @@ function generatePlotSystemPrompt(conversation: Conversation, character: Charact
 
   if (conversation.plotProgress) {
     parts.push(`\n【当前剧情进度】\n${conversation.plotProgress}`);
+  }
+
+  if (conversation.worldBook && conversation.worldBook.trim()) {
+    parts.push(`\n【世界书 - 补充设定 / 硬性词条】
+以下是你必须严格遵守的补充设定，每行一条词条（地点、物品、规则、背景等）。在对话中提及相关内容时，必须与下列描述一致，不得擅自篡改或遗忘：
+${conversation.worldBook}`);
+  }
+
+  if (conversation.characterStatus && conversation.characterStatus.trim()) {
+    parts.push(`\n【人物状态 - 实时维护】
+以下是目前各角色的状态快照（位置、物品、关系、健康等）。每次回复后你需要主动更新本节内容（用 <STATUS> 标签包裹），但不要在回复正文中显示此标签：
+${conversation.characterStatus}`);
   }
 
   parts.push(`\n【剧情演绎铁律】
@@ -464,6 +477,13 @@ export function useStreamChat(options: UseStreamChatOptions) {
               const recentForFacts = messages.slice(-4);
               const lastUserMsg = { role: 'user' as const, content, id: '', conversationId: '', tokens: 0, createdAt: Date.now(), parentMessageId: null, version: 1, isActiveVersion: true };
               const lastAssistantMsg = { role: 'assistant' as const, content: fullContent, id: '', conversationId: '', tokens: 0, createdAt: Date.now(), parentMessageId: null, version: 1, isActiveVersion: true };
+              const isFirstTime = !latestConv.memoryFacts || latestConv.memoryFacts.trim().length === 0;
+              // 首次初始化：对话达到 INITIAL_FACT_THRESHOLD 条消息时即开始提取（让 AI 早早建立记忆）
+              // 后续：每次助手回复后增量更新
+              if (isFirstTime && messages.length < INITIAL_FACT_THRESHOLD) {
+                // 不到阈值则跳过首次提取
+                return;
+              }
               const newFacts = await extractFacts(
                 settings,
                 latestConv.memoryFacts || '',

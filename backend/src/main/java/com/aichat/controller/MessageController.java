@@ -30,8 +30,7 @@ public class MessageController {
 
     @PostMapping
     public MessageEntity create(@PathVariable String conversationId, @RequestBody MessageEntity message) {
-        message.setConversationId(conversationId);
-        return messageService.create(message);
+        return messageService.create(conversationId, message);
     }
 
     @PutMapping("/{messageId}/active-version")

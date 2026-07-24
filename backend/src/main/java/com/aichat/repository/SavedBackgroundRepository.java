@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface SavedBackgroundRepository extends JpaRepository<SavedBackgroundEntity, String> {
-    List<SavedBackgroundEntity> findAllByOrderByCreatedAtDesc();
+    List<SavedBackgroundEntity> findByUserIdOrderByCreatedAtDesc(String userId);
 }

@@ -1,6 +1,20 @@
+// ============ 用户类型 ============
+export interface User {
+  id: string;
+  username: string;
+  displayName: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
+  bootstrap?: boolean;
+}
+
 // ============ 角色类型 ============
 export interface Character {
   id: string;
+  userId?: string | null;
   name: string;
   avatar: string;
   description: string;
@@ -29,6 +43,7 @@ export type UpdateCharacterParams = Partial<Pick<Character, 'name' | 'avatar' | 
 // ============ 对话类型 ============
 export interface Conversation {
   id: string;
+  userId?: string | null;
   title: string;
   model: string;
   systemPrompt: string;
@@ -47,6 +62,12 @@ export interface Conversation {
   plotSetting: string;
   /** 当前剧情进度（可选：用户可手动维护） */
   plotProgress: string;
+  /** 世界书：剧情模式下的补充设定（地名/物品/规则/背景板），每条独立 */
+  worldBook: string;
+  /** 剧情人物状态：人物状态、地点、持有物品、关系变化 */
+  characterStatus: string;
+  /** 记忆点（最近一次保存记忆的 messageId），用于回溯定位 */
+  memoryCheckpointMsgId: string;
   /** 记忆摘要（用于长期记忆压缩） */
   memorySummary: string;
   /** 记忆摘要覆盖到第几条消息 */
@@ -61,8 +82,8 @@ export type CreateConversationParams = Pick<Conversation, 'title' | 'model' | 's
 export type UpdateConversationParams = Partial<Pick<Conversation,
   'title' | 'model' | 'systemPrompt' | 'characterId' |
   'background' | 'backgroundOpacity' | 'backgroundFilter' | 'backgroundAnimation' |
-  'plotMode' | 'plotSetting' | 'plotProgress' |
-  'memorySummary' | 'memorySummaryUpTo' | 'memoryFacts'
+  'plotMode' | 'plotSetting' | 'plotProgress' | 'worldBook' | 'characterStatus' |
+  'memoryCheckpointMsgId' | 'memorySummary' | 'memorySummaryUpTo' | 'memoryFacts'
 >>;
 
 // ============ 消息类型 ============
@@ -126,6 +147,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
 // ============ 收藏背景类型 ============
 export interface SavedBackground {
   id: string;
+  userId?: string | null;
   name: string;
   /** 背景 CSS 值（颜色 / 渐变 / data URL / http URL） */
   value: string;
