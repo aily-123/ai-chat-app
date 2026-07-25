@@ -64,7 +64,7 @@ const PRESET_MODELS = [
   'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo',
   'o1', 'o1-mini',
   'claude-3-5-sonnet-20241022',
-  'deepseek-chat', 'deepseek-reasoner',
+  'deepseek-v4-pro', 'deepseek-v4-flash', 'deepseek-reasoner',
 ];
 
 const FEATURES = [
@@ -435,7 +435,8 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
                       <option value="o1">o1</option>
                       <option value="o1-mini">o1 Mini</option>
                       <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-                      <option value="deepseek-chat">DeepSeek V4</option>
+                      <option value="deepseek-v4-pro">DeepSeek V4 Pro</option>
+                      <option value="deepseek-v4-flash">DeepSeek V4 Flash</option>
                       <option value="deepseek-reasoner">DeepSeek R1</option>
                       <option value="__custom__">自定义...</option>
                     </select>

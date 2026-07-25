@@ -192,10 +192,13 @@ export const backendApi = {
 
     getAll: async (): Promise<AppSettings> => {
       const raw = await request<Record<string, string>>('/settings');
+      // 旧模型名迁移：deepseek-chat → deepseek-v4-pro
+      let model = raw.model || DEFAULT_SETTINGS.model;
+      if (model === 'deepseek-chat') model = 'deepseek-v4-pro';
       return {
         apiKey: raw.apiKey || DEFAULT_SETTINGS.apiKey,
         apiBase: raw.apiBase || DEFAULT_SETTINGS.apiBase,
-        model: raw.model || DEFAULT_SETTINGS.model,
+        model,
         temperature: raw.temperature ? parseFloat(raw.temperature) : DEFAULT_SETTINGS.temperature,
         maxTokens: raw.maxTokens ? parseInt(raw.maxTokens, 10) : DEFAULT_SETTINGS.maxTokens,
         theme: (raw.theme as 'light' | 'dark') || DEFAULT_SETTINGS.theme,

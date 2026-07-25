@@ -397,10 +397,13 @@ export const settingsStorage = {
 
     try {
       const stored = JSON.parse(data);
+      // 旧模型名迁移：deepseek-chat → deepseek-v4-pro
+      let model = stored.model || DEFAULT_SETTINGS.model;
+      if (model === 'deepseek-chat') model = 'deepseek-v4-pro';
       return {
         apiKey: stored.apiKey || DEFAULT_SETTINGS.apiKey,
         apiBase: stored.apiBase || DEFAULT_SETTINGS.apiBase,
-        model: stored.model || DEFAULT_SETTINGS.model,
+        model,
         temperature: stored.temperature ? parseFloat(stored.temperature) : DEFAULT_SETTINGS.temperature,
         maxTokens: stored.maxTokens ? parseInt(stored.maxTokens, 10) : DEFAULT_SETTINGS.maxTokens,
         theme: (stored.theme as 'light' | 'dark') || DEFAULT_SETTINGS.theme,
