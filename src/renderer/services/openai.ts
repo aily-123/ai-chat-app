@@ -1,6 +1,14 @@
 import OpenAI from 'openai';
 import type { StreamChatOptions, StreamChatMessage } from '../../shared/types';
 
+// 模型名归一化：旧名称自动映射到新名称，防止 API 报错
+function normalizeModel(model: string): string {
+  const modelMap: Record<string, string> = {
+    'deepseek-chat': 'deepseek-v4-pro',
+  };
+  return modelMap[model] || model;
+}
+
 /**
  * 流式聊天 — 逐 token 回调
  * 在渲染进程中直接调用 OpenAI API（支持 CORS 的代理或直连）
@@ -23,7 +31,7 @@ export async function streamChat(options: StreamChatOptions): Promise<void> {
 
   try {
     const stream = await client.chat.completions.create({
-      model,
+      model: normalizeModel(model),
       messages: formattedMessages,
       temperature,
       max_tokens: maxTokens,
@@ -64,7 +72,7 @@ export async function chat(
   });
 
   const response = await client.chat.completions.create({
-    model: options.model,
+    model: normalizeModel(options.model),
     messages: messages.map((m) => ({
       role: m.role as 'user' | 'assistant' | 'system',
       content: m.content,

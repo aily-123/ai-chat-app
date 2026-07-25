@@ -16,25 +16,43 @@ public class SettingsService {
         this.settingsRepository = settingsRepository;
     }
 
-    /** 仅返回当前用户的设置 */
+    /** 仅返回当前用户的设置（含旧模型名自动迁移） */
     public Map<String, String> getAll() {
         String userId = UserContext.require();
         List<SettingsEntity> all = settingsRepository.findByUserId(userId);
         Map<String, String> result = new LinkedHashMap<>();
         for (SettingsEntity s : all) {
-            result.put(s.getSettingKey(), s.getSettingValue());
+            String value = s.getSettingValue();
+            // 旧模型名自动迁移：deepseek-chat → deepseek-v4-pro
+            if ("model".equals(s.getSettingKey()) && "deepseek-chat".equals(value)) {
+                value = "deepseek-v4-pro";
+                s.setSettingValue(value);
+                settingsRepository.save(s);
+            }
+            result.put(s.getSettingKey(), value);
         }
         return result;
     }
 
     public Optional<String> get(String key) {
         String userId = UserContext.require();
-        return settingsRepository.findByUserIdAndSettingKey(userId, key)
-                .map(SettingsEntity::getSettingValue);
+        Optional<SettingsEntity> entityOpt = settingsRepository.findByUserIdAndSettingKey(userId, key);
+        // 旧模型名自动迁移
+        if (entityOpt.isPresent() && "model".equals(key) && "deepseek-chat".equals(entityOpt.get().getSettingValue())) {
+            SettingsEntity s = entityOpt.get();
+            s.setSettingValue("deepseek-v4-pro");
+            settingsRepository.save(s);
+            return Optional.of("deepseek-v4-pro");
+        }
+        return entityOpt.map(SettingsEntity::getSettingValue);
     }
 
     public void set(String key, String value) {
         String userId = UserContext.require();
+        // 写入时也做迁移，防止旧值被写回
+        if ("model".equals(key) && "deepseek-chat".equals(value)) {
+            value = "deepseek-v4-pro";
+        }
         SettingsEntity entity = settingsRepository
                 .findByUserIdAndSettingKey(userId, key)
                 .orElse(new SettingsEntity(UUID.randomUUID().toString(), userId, key, value));
