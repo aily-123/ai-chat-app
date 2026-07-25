@@ -54,6 +54,7 @@ public class CharacterService {
             if (updates.getBackgroundOpacity() != null) existing.setBackgroundOpacity(updates.getBackgroundOpacity());
             if (updates.getBackgroundFilter() != null) existing.setBackgroundFilter(updates.getBackgroundFilter());
             if (updates.getBackgroundAnimation() != null) existing.setBackgroundAnimation(updates.getBackgroundAnimation());
+            if (updates.getModel() != null) existing.setModel(updates.getModel());
             existing.setUpdatedAt(System.currentTimeMillis());
             return characterRepository.save(existing);
         });

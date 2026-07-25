@@ -108,18 +108,25 @@ const App: React.FC = () => {
 
   const handleCreate = useCallback(async (characterId?: string) => {
     let backgroundParams: Partial<CreateConversationParams> = {};
+    let model = settings.model;
     if (characterId) {
       const character = characters.find(c => c.id === characterId);
-      if (character && character.background) {
-        backgroundParams = {
-          background: character.background,
-          backgroundOpacity: character.backgroundOpacity,
-          backgroundFilter: character.backgroundFilter,
-          backgroundAnimation: character.backgroundAnimation,
-        };
+      if (character) {
+        if (character.background) {
+          backgroundParams = {
+            background: character.background,
+            backgroundOpacity: character.backgroundOpacity,
+            backgroundFilter: character.backgroundFilter,
+            backgroundAnimation: character.backgroundAnimation,
+          };
+        }
+        // 角色专属模型优先，否则使用全局设置
+        if (character.model) {
+          model = character.model;
+        }
       }
     }
-    const conv = await createConversation({ model: settings.model, characterId, ...backgroundParams });
+    const conv = await createConversation({ model, characterId, ...backgroundParams });
     selectConversation(conv.id);
     return conv;
   }, [createConversation, selectConversation, settings.model, characters]);

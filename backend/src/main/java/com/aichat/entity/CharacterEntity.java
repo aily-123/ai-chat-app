@@ -51,6 +51,10 @@ public class CharacterEntity {
     @Column(name = "background_animation", length = 50)
     private String backgroundAnimation = "none";
 
+    /** 角色专属模型 — 对话时优先使用，为空则使用全局设置 */
+    @Column(length = 100)
+    private String model;
+
     @Column(name = "created_at", nullable = false)
     private Long createdAt;
 
@@ -87,6 +91,8 @@ public class CharacterEntity {
     public void setBackgroundFilter(String backgroundFilter) { this.backgroundFilter = backgroundFilter; }
     public String getBackgroundAnimation() { return backgroundAnimation; }
     public void setBackgroundAnimation(String backgroundAnimation) { this.backgroundAnimation = backgroundAnimation; }
+    public String getModel() { return model; }
+    public void setModel(String model) { this.model = model; }
     public Long getCreatedAt() { return createdAt; }
     public void setCreatedAt(Long createdAt) { this.createdAt = createdAt; }
     public Long getUpdatedAt() { return updatedAt; }

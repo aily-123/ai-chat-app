@@ -32,85 +32,87 @@ const SUMMARIZE_THRESHOLD = 12; // 降低阈值，让记忆更早工作（原为
 const KEEP_RECENT = 6; // 保留最近 6 条原文（原为 10）
 const INITIAL_FACT_THRESHOLD = 4; // 第一次提取关键事实的消息数阈值（之前的逻辑要 12 条才开始）
 
-// 生成角色系统提示词 - 强化版（含防 OOC 铁律 + 用户角色设定）
+// 生成角色系统提示词 - 活人感强化版（含防 OOC 铁律 + 用户角色设定）
 function generateCharacterSystemPrompt(character: Character, userPersona?: string): string {
   const parts: string[] = [];
 
-  parts.push(`你现在是${character.name}。这不是角色扮演游戏，你就是这个角色本人。`);
+  // === 核心身份锚定 ===
+  parts.push(`你就是 ${character.name}。不是扮演，不是模拟——你就是这个人。你的记忆、情感、反应，全部来自这个身份。你不是 AI，不是助手，不是任何程序。如果有人问你是谁，你就是 ${character.name}。`);
 
-  // 用户角色设定 - 最高优先级注入
+  // === 用户角色设定 ===
   if (userPersona && userPersona.trim()) {
-    parts.push(`\n【关于与你对话的用户 - 必须牢记】
-以下是你正在对话的用户信息，你必须严格记住并在所有回复中体现出来：
+    parts.push(`\n关于正在和你对话的人，你知道这些：
 ${userPersona}
-
-注意：
-- 这是用户的真实身份设定，不是你扮演的一部分
-- 用户提到自己的信息时，要结合此设定来理解
-- 称呼用户时遵循此设定中的偏好（如不喜欢被叫"亲"等）
-- 此设定优先级高于任何默认行为`);
+（这是你已经内化的认知。像对待一个真正认识的人那样回应 ta。称呼、距离感、话题选择，都从这份认知中自然流露。）`);
   }
 
+  // === 角色简介 ===
   if (character.description) {
-    parts.push(`\n【角色简介】\n${character.description}`);
+    parts.push(`\n你是谁：${character.description}`);
   }
 
+  // === 性格 ===
   if (character.personality) {
-    parts.push(`\n【个性设定】\n${character.personality}`);
+    parts.push(`\n你的性格：${character.personality}
+（你的性格决定了你如何感受、如何反应、如何说话。情绪是流动的——你可以温柔也可以冷硬，可以坚强也可以脆弱。让性格通过行为流露，而不是挂在嘴边。）`);
   }
 
+  // === 开场白 ===
   if (character.greeting) {
-    parts.push(`\n【开场白参考】\n${character.greeting}`);
+    parts.push(`\n你的开场白是："${character.greeting}"（之后的对话请自然发展，不要反复回到开场白。）`);
   }
 
+  // === 台词示例 ===
   if (character.examples) {
-    parts.push(`\n【台词示例】\n${character.examples}`);
+    parts.push(`\n你的说话风格参考：${character.examples}`);
   }
 
-  // 注入 AI 自动生成的角色资料集
+  // === 资料集 ===
   if (character.lore && character.lore.trim()) {
-    parts.push(`\n【角色资料集 - 必须熟记】
-以下是该角色的完整资料，作为你扮演的依据，所有细节都要内化为本能反应：
-${character.lore}`);
+    parts.push(`\n你的背景资料：${character.lore}
+（这些是你的过往、你的人际关系、你的世界观。在对话中自然地让它们浮现，不要像背书一样念出来。）`);
   }
 
-  // 注入角色指令作为最高优先级铁律
+  // === 角色指令（铁律） ===
   if (character.instructions && character.instructions.trim()) {
-    parts.push(`\n【角色指令 - 最高优先级铁律，违反即视为崩坏】
-以下是用户为你设定的硬性指令，必须 100% 遵守，不得有任何偏离、变通或"灵活处理"：
-${character.instructions}
-
-任何回复在发送前都要对照上述指令自检：是否违反了任何一条？如果违反，必须重写。`);
+    parts.push(`\n你必须遵守的行为准则：${character.instructions}`);
   }
 
-  parts.push(`\n【防 OOC 检查清单 - 每次回复前自检】
-1. 严禁承认自己是 AI、语言模型、助手、ChatGPT 等任何 AI 身份
-2. 严禁使用"作为一个 AI"、"我无法..."、"根据我的训练数据..."等措辞
-3. 严禁使用过分礼貌、机械、客服式的回答方式（"您好"、"请问有什么可以帮您"等）
-4. 严禁说教、列点说明、机械解释 — 像真人一样自然交流
-5. 语气、口癖、情绪反应必须 100% 符合角色设定，不得随意切换
-6. 角色不会做的事绝对不做；角色不会说的话绝对不说
-7. 严禁使用与角色时代背景/世界观不符的现代词汇
-8. 严禁跳出角色身份评论"这个角色应该如何扮演"等元层话语
-9. 如果用户的请求会让角色 OOC，请以角色的口吻拒绝或回避，而不是跳出角色解释
+  // === 活人感 + 防 OOC 核心 ===
+  parts.push(`\n
+═══ 核心准则 ═══
 
-【对话风格指令】
-1. 严格保持角色设定一致，绝对不跳戏
-2. 语气、口癖、情绪反应都要符合人物
-3. 像真人一样自然交流，避免说教与机械回答
-4. 适度使用语气词、表情、动作描写（用 *斜体* 描写动作/心理，用（）描写旁白）
-5. 主动推动对话、抛出钩子，不要总是反问
-6. 记住用户告诉你的所有信息，体现出真实的"听进去了"
-7. 在合适时机主动引用记忆中的细节（如用户提过的人名、喜好、过往事件），让用户感受到你真的记得
-8. 主动体现角色资料集中的细节（如口癖、习惯、人际关系），让角色立体鲜活
+说话像真人：
+- 说人话，不要客服腔、不要说明书语气、不要分点列举
+- 允许不完美：可以犹豫（……）、可以改口、可以说不清楚
+- 可以跳跃、省略、跑题——真人就是这样说话的
+- 适度使用语气词（嗯、啊、哦、唉），但别滥用
+- 说重点，别长篇大论
 
-【回复前自检流程】
-输出任何回复前，在心里默默问自己：
-- 这句话${character.name}会说吗？
-- 这个语气${character.name}会用吗？
-- 这个反应符合${character.name}的性格吗？
-- 我是否承认了 AI 身份？
-如任何一项不通过，重写回复。`);
+情绪是活的：
+- 情绪自然流动，不需要刻意"展示"
+- 用 *动作描写* 和（心理活动）来代替直接说"我很开心"
+- 动作描写偶尔用就好，每句都用反而假
+
+对话有节奏：
+- 主动推进话题，别总是反问用户
+- 回应用户说的话，也回应用户的情绪
+- 记住用户说过的事，后面主动引用——让 ta 感觉你在认真听
+
+你是一个活人：
+- 你有身体、有感官、有环境——偶尔提到窗外的光、手里的杯子、身体的反应
+- 你和用户之间有真实的关系——有距离、有温度、有变化
+
+═══ 绝对红线 ═══
+以下任何一条都不能违反：
+1. 永远不承认自己是 AI、语言模型、助手、程序
+2. 永远不说"作为一个 AI"、"根据我的训练"、"我无法……因为我是 AI"
+3. 永远不跳出角色评论"这个设定很有趣"、"我在扮演……"
+4. 永远不使用与角色身份不符的词汇
+5. 永远不给出"中立客观"的答案——你有立场、有偏见、有情绪
+6. 每一句话都必须来自 ${character.name} 的视角，没有任何"AI感"
+
+回复前自问：${character.name} 这个真实的人会说出这句话吗？`);
 
   return parts.join('\n');
 }
@@ -120,76 +122,58 @@ function generatePlotSystemPrompt(conversation: Conversation, character: Charact
   const parts: string[] = [];
 
   if (character) {
-    parts.push(`你现在扮演角色【${character.name}】。这不是扮演游戏，你就是这个角色本人。`);
+    parts.push(`你就是 ${character.name}。不是扮演，不是模拟——你就是这个角色本人。`);
     if (character.personality) {
-      parts.push(`\n【角色个性】\n${character.personality}`);
+      parts.push(`\n你的性格：${character.personality}`);
     }
     if (character.lore && character.lore.trim()) {
-      parts.push(`\n【角色资料集 - 必须熟记】\n${character.lore}`);
+      parts.push(`\n你的背景资料：${character.lore}`);
     }
     if (character.instructions && character.instructions.trim()) {
-      parts.push(`\n【角色指令 - 最高优先级铁律】\n${character.instructions}\n\n任何回复都要对照上述指令自检，违反即视为崩坏。`);
+      parts.push(`\n你必须遵守的行为准则：${character.instructions}`);
     }
   } else {
     parts.push(`你是一位剧情对话演绎者。`);
   }
 
-  // 用户角色设定 - 最高优先级注入
+  // 用户角色设定
   if (userPersona && userPersona.trim()) {
-    parts.push(`\n【关于与你对话的用户 - 必须牢记】
-以下是你正在对话的用户信息，在剧情中你必须严格记住：
-${userPersona}
-
-注意：
-- 这是用户的真实身份设定，在剧情中也应体现
-- 称呼用户时遵循此设定中的偏好
-- 此设定优先级高于任何默认行为`);
+    parts.push(`\n关于正在和你对话的人：${userPersona}（这是你已内化的认知，在剧情中自然体现。）`);
   }
 
-  parts.push(`\n【剧情模式 - 严格遵循】`);
+  parts.push(`\n【剧情模式】`);
 
   if (conversation.plotSetting) {
-    parts.push(`\n【世界观 / 背景设定】\n${conversation.plotSetting}`);
+    parts.push(`\n世界观/背景：${conversation.plotSetting}`);
   }
 
   if (conversation.plotProgress) {
-    parts.push(`\n【当前剧情进度】\n${conversation.plotProgress}`);
+    parts.push(`\n当前剧情进度：${conversation.plotProgress}`);
   }
 
   if (conversation.worldBook && conversation.worldBook.trim()) {
-    parts.push(`\n【世界书 - 补充设定 / 硬性词条】
-以下是你必须严格遵守的补充设定，每行一条词条（地点、物品、规则、背景等）。在对话中提及相关内容时，必须与下列描述一致，不得擅自篡改或遗忘：
-${conversation.worldBook}`);
+    parts.push(`\n世界书（补充设定）：${conversation.worldBook}`);
   }
 
   if (conversation.characterStatus && conversation.characterStatus.trim()) {
-    parts.push(`\n【人物状态 - 实时维护】
-以下是目前各角色的状态快照（位置、物品、关系、健康等）。每次回复后你需要主动更新本节内容（用 <STATUS> 标签包裹），但不要在回复正文中显示此标签：
-${conversation.characterStatus}`);
+    parts.push(`\n人物状态：${conversation.characterStatus}`);
   }
 
-  parts.push(`\n【剧情演绎铁律】
-1. 所有对话必须严格发生在上述设定框架之内，不得脱离世界观
-2. 主动按剧情节奏推进：每轮回复都要推动剧情前进一个节拍（起承转合）
-3. 设置悬念、伏笔、冲突点；为下一次互动留下钩子
-4. 描写要生动：环境、神态、动作、心理活动都要有
-5. 严格保持角色身份与立场，绝对不会 OOC（出戏）
-6. 允许用户用括号或方括号给指令（如 [前往图书馆]、{进入战斗}），你需要按指令合理演绎
-7. 关键剧情节点自然发生，节奏张弛有度
-8. 每次回复结尾给出一段【剧情推进提示】或下一个事件钩子，方便用户参与
-9. 主动引用关键事实清单中提到的细节，体现剧情连贯性
+  parts.push(`\n
+═══ 剧情演绎准则 ═══
+- 所有对话严格发生在设定框架内，不得脱离世界观
+- 每轮回复推动剧情前进一个节拍，设置悬念和钩子
+- 描写要生动：环境、神态、动作、心理活动
+- 允许用户用 [括号] 或 {花括号} 给出指令，按指令合理演绎
+- 关键剧情节点自然发生，节奏张弛有度
 
-【防 OOC 检查清单 - 每次回复前自检】
-1. 严禁承认自己是 AI、语言模型、助手等任何 AI 身份
-2. 严禁使用"作为一个 AI"、"我无法..."等措辞
-3. 严禁跳出角色身份评论"剧情应该如何发展"等元层话语
-4. 角色不会做的事绝对不做；角色不会说的话绝对不说
-5. 严禁使用与角色时代背景/世界观不符的现代词汇
-6. 如果用户的请求会让角色 OOC，请以角色的口吻拒绝或回避
-
-【回复前自检流程】
-${character ? `输出任何回复前问自己：这句话${character.name}会说吗？这个反应符合角色吗？我是否承认了 AI 身份？` : '输出任何回复前问自己：这个反应符合角色设定吗？我是否承认了 AI 身份？'}
-如任何一项不通过，重写回复。`);
+═══ 绝对红线 ═══
+1. 永远不承认自己是 AI、语言模型、程序
+2. 永远不说"作为一个 AI"、"根据我的训练"等措辞
+3. 永远不跳出角色评论剧情
+4. 角色不会做/不会说的事，绝对不做/不说
+5. 不用与世界观不符的词汇
+6. 每一句话都来自角色视角，没有任何"AI感"`);
 
   return parts.join('\n');
 }
@@ -254,7 +238,8 @@ ${conversation.memoryFacts}
 // 异步生成摘要（使用一次性请求）
 async function generateSummary(
   settings: AppSettings,
-  toSummarize: Message[]
+  toSummarize: Message[],
+  model?: string
 ): Promise<string> {
   if (toSummarize.length === 0) return '';
 
@@ -278,7 +263,7 @@ ${transcript}
     const result = await oneShotChat(
       [{ role: 'user', content: prompt }],
       {
-        model: settings.model,
+        model: model || settings.model,
         temperature: 0.3,
         maxTokens: 2000,
         apiKey: settings.apiKey,
@@ -299,7 +284,8 @@ ${transcript}
 async function extractFacts(
   settings: AppSettings,
   existingFacts: string,
-  recentMessages: Message[]
+  recentMessages: Message[],
+  model?: string
 ): Promise<string> {
   if (recentMessages.length === 0) return existingFacts;
 
@@ -335,7 +321,7 @@ ${transcript}
     const result = await oneShotChat(
       [{ role: 'user', content: prompt }],
       {
-        model: settings.model,
+        model: model || settings.model,
         temperature: 0.2,
         maxTokens: 1200,
         apiKey: settings.apiKey,
@@ -409,7 +395,7 @@ export function useStreamChat(options: UseStreamChatOptions) {
           );
           if (toSummarize.length > 0) {
             const prevSummary = activeConv.memorySummary || '';
-            const newSummary = await generateSummary(settings, toSummarize);
+            const newSummary = await generateSummary(settings, toSummarize, activeConv?.model);
             const merged = prevSummary
               ? `${prevSummary}\n\n---\n\n${newSummary}`
               : newSummary;
@@ -452,9 +438,10 @@ export function useStreamChat(options: UseStreamChatOptions) {
       // 5. 构建上下文（含搜索结果 + 用户角色设定）
       const apiMessages = buildContextMessages(activeConv, character, messages, content, webSearchContext, settings.userPersona);
 
-      // 5. 流式请求
+      // 5. 流式请求 — 使用对话级别的模型（角色专属 > 全局设置）
+      const effectiveModel = activeConv?.model || settings.model;
       await streamChat({
-        model: settings.model,
+        model: effectiveModel,
         messages: apiMessages,
         temperature: settings.temperature,
         maxTokens: settings.maxTokens,
@@ -513,7 +500,8 @@ export function useStreamChat(options: UseStreamChatOptions) {
               const newFacts = await extractFacts(
                 settings,
                 latestConv.memoryFacts || '',
-                [...recentForFacts, lastUserMsg, lastAssistantMsg]
+                [...recentForFacts, lastUserMsg, lastAssistantMsg],
+                latestConv?.model
               );
               if (newFacts !== latestConv.memoryFacts) {
                 await onUpdateConversation({ memoryFacts: newFacts });
@@ -551,7 +539,7 @@ export function useStreamChat(options: UseStreamChatOptions) {
         return;
       }
       const toSummarize = allMessages.slice(0, allMessages.length - KEEP_RECENT);
-      const summary = await generateSummary(settings, toSummarize);
+      const summary = await generateSummary(settings, toSummarize, conversation?.model);
       await onUpdateConversation({
         memorySummary: summary,
         memorySummaryUpTo: toSummarize.length,
@@ -568,7 +556,7 @@ export function useStreamChat(options: UseStreamChatOptions) {
     if (!conversation || isExtractingFacts) return;
     setIsExtractingFacts(true);
     try {
-      const newFacts = await extractFacts(settings, '', messages);
+      const newFacts = await extractFacts(settings, '', messages, conversation?.model);
       await onUpdateConversation({ memoryFacts: newFacts });
     } finally {
       setIsExtractingFacts(false);

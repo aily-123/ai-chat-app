@@ -6,6 +6,14 @@ import { generateCharacterLore } from '../services/characterLore';
 import { compressImage } from '../lib/utils';
 import type { Character } from '../../shared/types';
 
+// 预设模型列表
+const PRESET_MODELS = [
+  'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo',
+  'o1', 'o1-mini',
+  'claude-3-5-sonnet-20241022',
+  'deepseek-v4-pro', 'deepseek-v4-flash', 'deepseek-reasoner',
+];
+
 interface CharacterPanelProps {
   onClose: () => void;
   onStartChat?: (characterId: string) => void;
@@ -32,9 +40,11 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
     backgroundOpacity: 0.85,
     backgroundFilter: '',
     backgroundAnimation: 'none',
+    model: '',
   });
   const bgFileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingBg, setIsUploadingBg] = useState(false);
+  const [showCustomModel, setShowCustomModel] = useState(false);
 
   useEffect(() => {
     loadCharacters();
@@ -55,7 +65,9 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
       backgroundOpacity: character.backgroundOpacity !== undefined ? character.backgroundOpacity : 0.85,
       backgroundFilter: character.backgroundFilter || '',
       backgroundAnimation: character.backgroundAnimation || 'none',
+      model: character.model || '',
     });
+    setShowCustomModel(!!(character.model && !PRESET_MODELS.includes(character.model)));
     setIsEditing(false);
   };
 
@@ -74,7 +86,9 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
       backgroundOpacity: 0.85,
       backgroundFilter: '',
       backgroundAnimation: 'none',
+      model: '',
     });
+    setShowCustomModel(false);
     setIsEditing(true);
   };
 
@@ -676,7 +690,72 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
                   )}
                 </div>
 
-                {/* Row 7: 角色默认背景 — 创建对话时自动应用 */}
+                {/* Row 7: 角色专属模型选择 */}
+                <div className="p-4 hairline">
+                  <div className="flex items-baseline justify-between mb-2">
+                    <label className="text-[13px] font-medium flex items-center gap-1.5" style={{ color: 'var(--ink)' }}>
+                      角色专属模型
+                      <span
+                        className="text-[9px] tracking-[0.2em] uppercase ml-1 px-1.5 py-0.5 hairline"
+                        style={{ color: 'var(--accent)', borderRadius: 2 }}
+                      >
+                        可选
+                      </span>
+                    </label>
+                    <span className="text-[9px] tracking-[0.2em] uppercase opacity-40">/ MODEL</span>
+                  </div>
+                  <p className="text-[11px] leading-[1.6] mb-2.5" style={{ color: 'var(--muted-2)' }}>
+                    为该角色指定专属 AI 模型。留空则使用全局设置中的模型。创建角色后即可直接对话，无需再到设置中切换。
+                  </p>
+                  <div className="glow-on-focus rounded-sm" style={{ border: '1px solid var(--hairline-strong)' }}>
+                    <select
+                      value={showCustomModel ? '__custom__' : (PRESET_MODELS.includes(formData.model) ? formData.model : '')}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom__') {
+                          setShowCustomModel(true);
+                          setFormData({ ...formData, model: '' });
+                        } else if (e.target.value === '') {
+                          setShowCustomModel(false);
+                          setFormData({ ...formData, model: '' });
+                        } else {
+                          setShowCustomModel(false);
+                          setFormData({ ...formData, model: e.target.value });
+                        }
+                      }}
+                      className="w-full px-3.5 py-2.5 bg-transparent text-[13px] focus:outline-none transition-quick appearance-none cursor-pointer"
+                      style={{ color: 'var(--ink)' }}
+                    >
+                      <option value="">使用全局设置</option>
+                      <option value="gpt-4o">GPT-4o</option>
+                      <option value="gpt-4o-mini">GPT-4o Mini</option>
+                      <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                      <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                      <option value="o1">o1</option>
+                      <option value="o1-mini">o1 Mini</option>
+                      <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+                      <option value="deepseek-v4-pro">DeepSeek V4 Pro</option>
+                      <option value="deepseek-v4-flash">DeepSeek V4 Flash</option>
+                      <option value="deepseek-reasoner">DeepSeek R1</option>
+                      <option value="__custom__">自定义...</option>
+                    </select>
+                  </div>
+                  {showCustomModel && (
+                    <div className="mt-2">
+                      <div className="glow-on-focus rounded-sm" style={{ border: '1px solid var(--hairline-strong)' }}>
+                        <input
+                          type="text"
+                          value={formData.model}
+                          onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                          placeholder="输入自定义模型名称，如：gpt-4-1106-preview"
+                          className="w-full px-3.5 py-2.5 bg-transparent text-[13px] focus:outline-none transition-quick"
+                          style={{ color: 'var(--ink)' }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Row 8: 角色默认背景 — 创建对话时自动应用 */}
                 <div className="p-4 hairline" style={{ borderTop: '2px solid var(--accent)' }}>
                   <div className="flex items-baseline justify-between mb-2">
                     <label className="text-[13px] font-medium flex items-center gap-1.5" style={{ color: 'var(--ink)' }}>
@@ -833,6 +912,7 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
                 onClick={() => {
                   if (selectedCharacter) {
                     setIsEditing(false);
+                    setShowCustomModel(!!(selectedCharacter.model && !PRESET_MODELS.includes(selectedCharacter.model)));
                     setFormData({
                       name: selectedCharacter.name,
                       avatar: selectedCharacter.avatar,
@@ -846,6 +926,7 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({ onClose, onStart
                       backgroundOpacity: selectedCharacter.backgroundOpacity !== undefined ? selectedCharacter.backgroundOpacity : 0.85,
                       backgroundFilter: selectedCharacter.backgroundFilter || '',
                       backgroundAnimation: selectedCharacter.backgroundAnimation || 'none',
+                      model: selectedCharacter.model || '',
                     });
                   } else {
                     onClose();

@@ -33,12 +33,14 @@ export interface Character {
   backgroundFilter: string;
   /** 角色默认背景动画模式：none / gradient-flow / pulse / parallax / drift */
   backgroundAnimation: string;
+  /** 角色专属模型：对话时使用此模型，为空则使用全局设置 */
+  model: string;
   createdAt: number;
   updatedAt: number;
 }
 
-export type CreateCharacterParams = Pick<Character, 'name' | 'avatar' | 'description' | 'personality' | 'greeting' | 'examples' | 'instructions' | 'lore' | 'background' | 'backgroundOpacity' | 'backgroundFilter' | 'backgroundAnimation'>;
-export type UpdateCharacterParams = Partial<Pick<Character, 'name' | 'avatar' | 'description' | 'personality' | 'greeting' | 'examples' | 'instructions' | 'lore' | 'background' | 'backgroundOpacity' | 'backgroundFilter' | 'backgroundAnimation'>>;
+export type CreateCharacterParams = Pick<Character, 'name' | 'avatar' | 'description' | 'personality' | 'greeting' | 'examples' | 'instructions' | 'lore' | 'background' | 'backgroundOpacity' | 'backgroundFilter' | 'backgroundAnimation' | 'model'>;
+export type UpdateCharacterParams = Partial<Pick<Character, 'name' | 'avatar' | 'description' | 'personality' | 'greeting' | 'examples' | 'instructions' | 'lore' | 'background' | 'backgroundOpacity' | 'backgroundFilter' | 'backgroundAnimation' | 'model'>>;
 
 // ============ 对话类型 ============
 export interface Conversation {

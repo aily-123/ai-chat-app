@@ -58,6 +58,7 @@ export const useCharacterStore = create<CharacterState>((set, get) => ({
       backgroundOpacity: params.backgroundOpacity ?? 0.85,
       backgroundFilter: params.backgroundFilter || '',
       backgroundAnimation: params.backgroundAnimation || 'none',
+      model: params.model || '',
     });
     await get().loadCharacters();
     return character;

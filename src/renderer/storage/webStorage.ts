@@ -307,6 +307,7 @@ export const characterStorage = {
     backgroundOpacity?: number;
     backgroundFilter?: string;
     backgroundAnimation?: string;
+    model?: string;
   }): Character => {
     const characters = characterStorage.getAll();
     const now = Date.now();
@@ -324,6 +325,7 @@ export const characterStorage = {
       backgroundOpacity: params.backgroundOpacity !== undefined ? params.backgroundOpacity : 0.85,
       backgroundFilter: params.backgroundFilter || '',
       backgroundAnimation: params.backgroundAnimation || 'none',
+      model: params.model || '',
       createdAt: now,
       updatedAt: now,
     };
