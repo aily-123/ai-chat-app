@@ -204,6 +204,7 @@ export const backendApi = {
         wallpaperFilter: raw.wallpaperFilter || DEFAULT_SETTINGS.wallpaperFilter,
         wallpaperAnimation: raw.wallpaperAnimation || DEFAULT_SETTINGS.wallpaperAnimation,
         webSearchEnabled: raw.webSearchEnabled === 'true',
+        userPersona: raw.userPersona || DEFAULT_SETTINGS.userPersona,
       };
     },
   },

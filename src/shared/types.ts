@@ -128,6 +128,8 @@ export interface AppSettings {
   wallpaperAnimation: string;
   /** 是否启用联网搜索（发送消息前自动检索相关信息） */
   webSearchEnabled: boolean;
+  /** 用户角色设定：告诉 AI 你是谁、你的身份、背景等，AI 会严格记住 */
+  userPersona: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -142,6 +144,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   wallpaperFilter: '',
   wallpaperAnimation: 'none',
   webSearchEnabled: false,
+  userPersona: '',
 };
 
 // ============ 收藏背景类型 ============

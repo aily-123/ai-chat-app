@@ -411,6 +411,7 @@ export const settingsStorage = {
         webSearchEnabled: stored.webSearchEnabled !== undefined
           ? stored.webSearchEnabled === 'true' || stored.webSearchEnabled === true
           : DEFAULT_SETTINGS.webSearchEnabled,
+        userPersona: stored.userPersona || DEFAULT_SETTINGS.userPersona,
       };
     } catch {
       return DEFAULT_SETTINGS;

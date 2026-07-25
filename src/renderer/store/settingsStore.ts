@@ -63,6 +63,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         await api.settings.set('wallpaperAnimation', partial.wallpaperAnimation);
       if (partial.webSearchEnabled !== undefined)
         await api.settings.set('webSearchEnabled', String(partial.webSearchEnabled));
+      if (partial.userPersona !== undefined)
+        await api.settings.set('userPersona', partial.userPersona);
     } catch (err) {
       console.error('Failed to save settings:', err);
     }
@@ -83,6 +85,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       await api.settings.set('wallpaperFilter', DEFAULT_SETTINGS.wallpaperFilter);
       await api.settings.set('wallpaperAnimation', DEFAULT_SETTINGS.wallpaperAnimation);
       await api.settings.set('webSearchEnabled', String(DEFAULT_SETTINGS.webSearchEnabled));
+      await api.settings.set('userPersona', DEFAULT_SETTINGS.userPersona);
     } catch (err) {
       console.error('Failed to reset settings:', err);
     }

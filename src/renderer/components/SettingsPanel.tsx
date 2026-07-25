@@ -13,7 +13,7 @@ interface Props {
   currentUser?: User | null;
 }
 
-type Section = 'api' | 'model' | 'appearance' | 'wallpaper' | 'about';
+type Section = 'api' | 'model' | 'persona' | 'appearance' | 'wallpaper' | 'about';
 
 // 编辑设计风格的预设背景 — 沉稳的色板而非刺眼渐变
 const PRESET_WALLPAPERS: { name: string; en: string; value: string; tone: 'warm' | 'cool' | 'neutral' }[] = [
@@ -57,6 +57,14 @@ const QUICK_PRESETS = [
   { name: 'DeepSeek', base: 'https://api.deepseek.com/v1', code: 'D' },
   { name: '通义千问', base: 'https://dashscope.aliyuncs.com/compatible-mode/v1', code: 'T' },
   { name: '月之暗面', base: 'https://api.moonshot.cn/v1', code: 'K' },
+];
+
+// 预设模型列表（用于判断是否为自定义模型）
+const PRESET_MODELS = [
+  'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo',
+  'o1', 'o1-mini',
+  'claude-3-5-sonnet-20241022',
+  'deepseek-chat', 'deepseek-reasoner',
 ];
 
 const FEATURES = [
@@ -144,10 +152,21 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
       ),
     },
     {
+      id: 'persona',
+      label: '用户角色',
+      en: 'Persona',
+      code: '03',
+      icon: (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      ),
+    },
+    {
       id: 'appearance',
       label: '外观',
       en: 'Appearance',
-      code: '03',
+      code: '04',
       icon: (
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
@@ -158,7 +177,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
       id: 'wallpaper',
       label: '全局背景',
       en: 'Wallpaper',
-      code: '04',
+      code: '05',
       icon: (
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -169,7 +188,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
       id: 'about',
       label: '关于',
       en: 'About',
-      code: '05',
+      code: '06',
       icon: (
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -204,7 +223,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
                   设<em className="italic font-extralight" style={{ color: 'var(--accent)' }}>置</em>
                 </h2>
               </div>
-              <span className="numeric-badge mt-1">05</span>
+              <span className="numeric-badge mt-1">06</span>
             </div>
             <p className="text-[11.5px] leading-[1.65]" style={{ color: 'var(--muted)' }}>
               个性化你的对话环境
@@ -394,11 +413,18 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
 
             {activeSection === 'model' && (
               <div className="space-y-6 cinematic-fade">
-                <Field code="B.1" label="模型选择" tip="选择要使用的 AI 模型">
+                <Field code="B.1" label="模型选择" tip="选择预设模型，或选择「自定义」输入任意模型名称">
                   <div className="glow-on-focus rounded-sm" style={{ border: '1px solid var(--hairline-strong)' }}>
                     <select
-                      value={settings.model}
-                      onChange={(e) => onUpdate({ model: e.target.value })}
+                      value={PRESET_MODELS.includes(settings.model) ? settings.model : '__custom__'}
+                      onChange={(e) => {
+                        if (e.target.value === '__custom__') {
+                          // 切换到自定义模式，不清空已有值
+                          onUpdate({ model: '' });
+                        } else {
+                          onUpdate({ model: e.target.value });
+                        }
+                      }}
                       className="w-full px-3.5 py-2.5 bg-transparent text-[13px] focus:outline-none transition-quick appearance-none cursor-pointer"
                       style={{ color: 'var(--ink)' }}
                     >
@@ -411,8 +437,37 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
                       <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
                       <option value="deepseek-chat">DeepSeek V4</option>
                       <option value="deepseek-reasoner">DeepSeek R1</option>
+                      <option value="__custom__">自定义...</option>
                     </select>
                   </div>
+                  {(!PRESET_MODELS.includes(settings.model) && settings.model) && (
+                    <div className="mt-2">
+                      <div className="glow-on-focus rounded-sm" style={{ border: '1px solid var(--hairline-strong)' }}>
+                        <input
+                          type="text"
+                          value={settings.model}
+                          onChange={(e) => onUpdate({ model: e.target.value })}
+                          placeholder="输入自定义模型名称，如：gpt-4-1106-preview"
+                          className="w-full px-3.5 py-2.5 bg-transparent text-[13px] focus:outline-none transition-quick"
+                          style={{ color: 'var(--ink)' }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {settings.model === '' && (
+                    <div className="mt-2">
+                      <div className="glow-on-focus rounded-sm" style={{ border: '1px solid var(--hairline-strong)' }}>
+                        <input
+                          type="text"
+                          value={settings.model}
+                          onChange={(e) => onUpdate({ model: e.target.value })}
+                          placeholder="输入自定义模型名称，如：gpt-4-1106-preview"
+                          className="w-full px-3.5 py-2.5 bg-transparent text-[13px] focus:outline-none transition-quick"
+                          style={{ color: 'var(--ink)' }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </Field>
 
                 <Field
@@ -547,6 +602,81 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
                       开启后，每次发送消息会先通过 Wikipedia + DuckDuckGo 搜索相关信息，注入到 AI 上下文。可在输入栏底部快速切换。
                     </p>
                   </button>
+                </Field>
+              </div>
+            )}
+
+            {activeSection === 'persona' && (
+              <div className="space-y-6 cinematic-fade">
+                <div
+                  className="p-4 hairline rounded-sm flex items-start gap-3"
+                  style={{ background: 'var(--paper-2)' }}
+                >
+                  <span
+                    className="font-display text-[28px] font-light leading-none italic"
+                    style={{ color: 'var(--accent)' }}
+                  >
+                    @
+                  </span>
+                  <div className="flex-1 text-[12px] leading-[1.7]" style={{ color: 'var(--muted)' }}>
+                    设定你的<strong style={{ color: 'var(--ink)' }}>用户角色</strong>，AI 将严格记住你的身份、背景、喜好等信息。
+                    在所有对话中，智能体都会参考此设定来回应你。
+                  </div>
+                </div>
+
+                <Field code="C.1" label="用户角色设定" tip="告诉 AI 你是谁——你的身份、背景、性格、偏好等，AI 会在所有对话中严格记住">
+                  <textarea
+                    value={settings.userPersona || ''}
+                    onChange={(e) => onUpdate({ userPersona: e.target.value })}
+                    rows={8}
+                    placeholder={`例如：
+我是张三，28岁，一名程序员。我喜欢科幻小说和咖啡。
+我的性格比较内向但说话直接，不喜欢拐弯抹角。
+我有两只猫，分别叫小白和小花。
+我最近在学日语，希望 AI 偶尔用简单的日语回复我。
+我不喜欢别人叫我"亲"或"亲爱的"。
+我讨厌数学和冗长的解释，请直接说重点。`}
+                    className="w-full px-3.5 py-3 text-[13px] leading-[1.7] bg-transparent hairline focus:outline-none resize-none font-mono-ui"
+                    style={{ color: 'var(--ink)', borderRadius: 3 }}
+                  />
+                  {settings.userPersona && (
+                    <div className="mt-2 flex justify-between items-center">
+                      <span className="numeric-badge" style={{ color: 'var(--muted-2)' }}>
+                        {String(settings.userPersona.length).padStart(4, '0')} 字
+                      </span>
+                      <button
+                        onClick={() => onUpdate({ userPersona: '' })}
+                        className="px-3 py-1 text-[11px] tracking-wider hairline hover:bg-[var(--paper-2)] transition-quick"
+                        style={{ color: 'var(--accent)', borderRadius: 3 }}
+                      >
+                        清空
+                      </button>
+                    </div>
+                  )}
+                </Field>
+
+                <Field code="C.2" label="使用说明" tip="用户角色设定如何影响 AI 行为">
+                  <div
+                    className="p-4 hairline rounded-sm space-y-3 text-[12.5px] leading-[1.8]"
+                    style={{ background: 'var(--paper-2)', color: 'var(--muted)' }}
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="numeric-badge mt-0.5" style={{ color: 'var(--accent)' }}>01</span>
+                      <span>每次对话开始时，AI 的 system prompt 中会注入你的<strong style={{ color: 'var(--ink)' }}>用户角色设定</strong>。</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="numeric-badge mt-0.5" style={{ color: 'var(--accent)' }}>02</span>
+                      <span>AI 会像<strong style={{ color: 'var(--ink)' }}>长期记忆</strong>一样记住你的身份，不会在对话中忘记。</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="numeric-badge mt-0.5" style={{ color: 'var(--accent)' }}>03</span>
+                      <span>无论是普通聊天还是剧情模式，角色设定都会生效。</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="numeric-badge mt-0.5" style={{ color: 'var(--accent)' }}>04</span>
+                      <span>修改后立即生效，下次发送消息时 AI 就会按新设定回应。</span>
+                    </div>
+                  </div>
                 </Field>
               </div>
             )}

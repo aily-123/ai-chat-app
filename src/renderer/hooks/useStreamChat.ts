@@ -32,11 +32,24 @@ const SUMMARIZE_THRESHOLD = 12; // 降低阈值，让记忆更早工作（原为
 const KEEP_RECENT = 6; // 保留最近 6 条原文（原为 10）
 const INITIAL_FACT_THRESHOLD = 4; // 第一次提取关键事实的消息数阈值（之前的逻辑要 12 条才开始）
 
-// 生成角色系统提示词 - 强化版（含防 OOC 铁律）
-function generateCharacterSystemPrompt(character: Character): string {
+// 生成角色系统提示词 - 强化版（含防 OOC 铁律 + 用户角色设定）
+function generateCharacterSystemPrompt(character: Character, userPersona?: string): string {
   const parts: string[] = [];
 
   parts.push(`你现在是${character.name}。这不是角色扮演游戏，你就是这个角色本人。`);
+
+  // 用户角色设定 - 最高优先级注入
+  if (userPersona && userPersona.trim()) {
+    parts.push(`\n【关于与你对话的用户 - 必须牢记】
+以下是你正在对话的用户信息，你必须严格记住并在所有回复中体现出来：
+${userPersona}
+
+注意：
+- 这是用户的真实身份设定，不是你扮演的一部分
+- 用户提到自己的信息时，要结合此设定来理解
+- 称呼用户时遵循此设定中的偏好（如不喜欢被叫"亲"等）
+- 此设定优先级高于任何默认行为`);
+  }
 
   if (character.description) {
     parts.push(`\n【角色简介】\n${character.description}`);
@@ -102,8 +115,8 @@ ${character.instructions}
   return parts.join('\n');
 }
 
-// 生成剧情模式系统提示词 - 强化版（含防 OOC 铁律）
-function generatePlotSystemPrompt(conversation: Conversation, character: Character | null): string {
+// 生成剧情模式系统提示词 - 强化版（含防 OOC 铁律 + 用户角色设定）
+function generatePlotSystemPrompt(conversation: Conversation, character: Character | null, userPersona?: string): string {
   const parts: string[] = [];
 
   if (character) {
@@ -119,6 +132,18 @@ function generatePlotSystemPrompt(conversation: Conversation, character: Charact
     }
   } else {
     parts.push(`你是一位剧情对话演绎者。`);
+  }
+
+  // 用户角色设定 - 最高优先级注入
+  if (userPersona && userPersona.trim()) {
+    parts.push(`\n【关于与你对话的用户 - 必须牢记】
+以下是你正在对话的用户信息，在剧情中你必须严格记住：
+${userPersona}
+
+注意：
+- 这是用户的真实身份设定，在剧情中也应体现
+- 称呼用户时遵循此设定中的偏好
+- 此设定优先级高于任何默认行为`);
   }
 
   parts.push(`\n【剧情模式 - 严格遵循】`);
@@ -175,16 +200,17 @@ function buildContextMessages(
   character: Character | null,
   history: Message[],
   currentUserContent: string,
-  webSearchContext?: string
+  webSearchContext?: string,
+  userPersona?: string
 ): Array<{ role: 'user' | 'assistant' | 'system'; content: string }> {
   const apiMessages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }> = [];
 
   // 1. 顶层 system：剧情模式 or 角色模式
   let systemPrompt = '';
   if (conversation.plotMode) {
-    systemPrompt = generatePlotSystemPrompt(conversation, character);
+    systemPrompt = generatePlotSystemPrompt(conversation, character, userPersona);
   } else if (character) {
-    systemPrompt = generateCharacterSystemPrompt(character);
+    systemPrompt = generateCharacterSystemPrompt(character, userPersona);
   } else {
     systemPrompt = conversation.systemPrompt || '你是一个友好、有帮助的 AI 助手。';
   }
@@ -423,8 +449,8 @@ export function useStreamChat(options: UseStreamChatOptions) {
         }
       }
 
-      // 5. 构建上下文（含搜索结果）
-      const apiMessages = buildContextMessages(activeConv, character, messages, content, webSearchContext);
+      // 5. 构建上下文（含搜索结果 + 用户角色设定）
+      const apiMessages = buildContextMessages(activeConv, character, messages, content, webSearchContext, settings.userPersona);
 
       // 5. 流式请求
       await streamChat({
