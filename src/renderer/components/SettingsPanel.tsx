@@ -79,6 +79,9 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
   const [activeSection, setActiveSection] = useState<Section>('api');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showCustomModel, setShowCustomModel] = useState(
+    !PRESET_MODELS.includes(settings.model) && settings.model !== ''
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 同步外部 settings.wallpaper 变化（如切换主题/重置后）
@@ -416,18 +419,22 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
                 <Field code="B.1" label="模型选择" tip="选择预设模型，或选择「自定义」输入任意模型名称">
                   <div className="glow-on-focus rounded-sm" style={{ border: '1px solid var(--hairline-strong)' }}>
                     <select
-                      value={PRESET_MODELS.includes(settings.model) ? settings.model : '__custom__'}
+                      value={showCustomModel ? '__custom__' : (PRESET_MODELS.includes(settings.model) ? settings.model : '')}
                       onChange={(e) => {
                         if (e.target.value === '__custom__') {
-                          // 切换到自定义模式，不清空已有值
-                          onUpdate({ model: '' });
+                          setShowCustomModel(true);
+                          if (PRESET_MODELS.includes(settings.model)) {
+                            onUpdate({ model: '' });
+                          }
                         } else {
+                          setShowCustomModel(false);
                           onUpdate({ model: e.target.value });
                         }
                       }}
                       className="w-full px-3.5 py-2.5 bg-transparent text-[13px] focus:outline-none transition-quick appearance-none cursor-pointer"
                       style={{ color: 'var(--ink)' }}
                     >
+                      <option value="">默认 (GPT-4o)</option>
                       <option value="gpt-4o">GPT-4o</option>
                       <option value="gpt-4o-mini">GPT-4o Mini</option>
                       <option value="gpt-4-turbo">GPT-4 Turbo</option>
@@ -441,21 +448,7 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
                       <option value="__custom__">自定义...</option>
                     </select>
                   </div>
-                  {(!PRESET_MODELS.includes(settings.model) && settings.model) && (
-                    <div className="mt-2">
-                      <div className="glow-on-focus rounded-sm" style={{ border: '1px solid var(--hairline-strong)' }}>
-                        <input
-                          type="text"
-                          value={settings.model}
-                          onChange={(e) => onUpdate({ model: e.target.value })}
-                          placeholder="输入自定义模型名称，如：gpt-4-1106-preview"
-                          className="w-full px-3.5 py-2.5 bg-transparent text-[13px] focus:outline-none transition-quick"
-                          style={{ color: 'var(--ink)' }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                  {settings.model === '' && (
+                  {showCustomModel && (
                     <div className="mt-2">
                       <div className="glow-on-focus rounded-sm" style={{ border: '1px solid var(--hairline-strong)' }}>
                         <input

@@ -108,7 +108,7 @@ const App: React.FC = () => {
 
   const handleCreate = useCallback(async (characterId?: string) => {
     let backgroundParams: Partial<CreateConversationParams> = {};
-    let model = settings.model;
+    let model = settings.model || 'gpt-4o';
     if (characterId) {
       const character = characters.find(c => c.id === characterId);
       if (character) {
@@ -157,7 +157,7 @@ const App: React.FC = () => {
   const handleSend = useCallback(
     (content: string, options?: { parentMessageId?: string | null; branchMode?: boolean }) => {
       if (!activeConversationId) {
-        createConversation({ model: settings.model }).then((conv) => {
+        createConversation({ model: settings.model || 'gpt-4o' }).then((conv) => {
           selectConversation(conv.id).then(() => {
             setTimeout(() => sendMessage(content, options), 100);
           });

@@ -439,7 +439,7 @@ export function useStreamChat(options: UseStreamChatOptions) {
       const apiMessages = buildContextMessages(activeConv, character, messages, content, webSearchContext, settings.userPersona);
 
       // 5. 流式请求 — 使用对话级别的模型（角色专属 > 全局设置）
-      const effectiveModel = activeConv?.model || settings.model;
+      const effectiveModel = activeConv?.model || settings.model || 'gpt-4o';
       await streamChat({
         model: effectiveModel,
         messages: apiMessages,
