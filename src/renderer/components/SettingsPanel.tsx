@@ -409,7 +409,8 @@ export const SettingsPanel: React.FC<Props> = ({ settings, onUpdate, onClose, on
                       <option value="o1">o1</option>
                       <option value="o1-mini">o1 Mini</option>
                       <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
-                      <option value="deepseek-chat">DeepSeek Chat</option>
+                      <option value="deepseek-chat">DeepSeek V4</option>
+                      <option value="deepseek-reasoner">DeepSeek R1</option>
                     </select>
                   </div>
                 </Field>

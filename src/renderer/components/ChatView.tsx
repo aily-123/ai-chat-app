@@ -158,9 +158,13 @@ export const ChatView: React.FC<Props> = ({
 
   /**
    * AI 消息回溯（重写 AI 回复）：
-   * - 删除这条 AI 消息及之后的所有消息
-   * - 清空 AI 记忆
-   * - 找到对应的父用户消息，重新发送（让 AI 重新回复）
+   * - 从父用户消息处清空：删除用户消息 + AI 回复及之后所有内容
+   * - 清空 AI 记忆（关键事实 + 长期摘要）
+   * - 重新发送用户消息内容（让 AI 重新生成回复）
+   *
+   * 为什么从用户消息处清空而非 AI 消息处：
+   * 如果只删除 AI 消息而保留用户消息，再 onSend 会创建重复的用户消息。
+   * 从用户消息处清空可以确保只有一条用户消息，避免重复。
    */
   const handleBranchFrom = useCallback(async (assistantMessageId: string) => {
     if (!conversation || isStreaming) return;
@@ -174,20 +178,21 @@ export const ChatView: React.FC<Props> = ({
       : null;
     const userContent = userMsg?.content || '';
 
-    // 删除这条 AI 消息及其之后的所有消息，并清空 AI 记忆
-    if (onClearAfterMessage) {
+    // 从父用户消息处清空（删除用户消息 + AI 回复及之后所有内容 + 清空 AI 记忆）
+    if (userMsg && onClearFromMessage) {
+      await onClearFromMessage(userMsg.id);
+    } else if (onClearAfterMessage) {
+      // 兼容：如果没有 onClearFromMessage，回退到从 AI 消息处清空
       await onClearAfterMessage(assistantMessageId);
     } else if (onBranchFrom) {
-      // 兼容旧路径
       await onBranchFrom(assistantMessageId);
     }
 
-    // 重新生成 AI 回复：如果有对应的用户消息，则重新触发；
-    // 否则直接重发该 AI 消息的内容让 AI 重新生成
+    // 重新发送用户消息内容（此时原用户消息已被删除，不会重复）
     if (userContent) {
       onSend(userContent, { parentMessageId: null, branchMode: false });
     }
-  }, [conversation, messages, isStreaming, onClearAfterMessage, onBranchFrom, onSend]);
+  }, [conversation, messages, isStreaming, onClearAfterMessage, onClearFromMessage, onBranchFrom, onSend]);
 
   /**
    * 用户消息回溯（所有模式通用）：
