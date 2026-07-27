@@ -30,7 +30,8 @@ public class AuthFilter extends OncePerRequestFilter {
     private static final Set<String> AUTH_WHITELIST = Set.of(
             "/api/auth/login",
             "/api/auth/register",
-            "/api/auth/anon-bootstrap"
+            "/api/auth/anon-bootstrap",
+            "/api/health"
     );
 
     public AuthFilter(SessionStore sessionStore) {

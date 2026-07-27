@@ -1,20 +1,29 @@
-providers = []
-
 [phases.setup]
 nixPkgs = ["nodejs_22", "maven", "jdk"]
 
 [phases.install]
 cmds = [
+  "echo '=== Installing npm dependencies ==='",
   "npm install --legacy-peer-deps",
-  "cd backend && mvn dependency:go-offline -B"
+  "echo '=== Resolving Maven dependencies ==='",
+  "cd backend && mvn dependency:resolve dependency:resolve-plugins -B"
 ]
 
 [phases.build]
 cmds = [
-  "rm -rf dist backend/src/main/resources/static/assets backend/src/main/resources/static/index.html",
+  "echo '=== Building frontend ==='",
+  "rm -rf dist",
+  "rm -rf backend/src/main/resources/static/assets",
+  "rm -f backend/src/main/resources/static/index.html",
   "npm run build",
+  "ls -la dist/",
+  "echo '=== Copying frontend to backend static ==='",
   "cp -r dist/* backend/src/main/resources/static/",
-  "cd backend && mvn clean package -DskipTests -B"
+  "ls -la backend/src/main/resources/static/",
+  "echo '=== Building backend JAR ==='",
+  "cd backend && mvn clean package -DskipTests -B",
+  "ls -la backend/target/",
+  "echo '=== Build completed successfully ==='"
 ]
 
 [start]
