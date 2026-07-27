@@ -2,32 +2,20 @@ providers = []
 
 [phases.setup]
 nixPkgs = ["nodejs_22", "maven", "jdk"]
-noCache = true
 
 [phases.install]
 cmds = [
-  "echo '=== Install dependencies (no cache) ==='",
-  "rm -rf node_modules backend/target ~/.m2/repository",
-  "npm install --no-cache --legacy-peer-deps",
-  "cd backend && mvn dependency:resolve -B"
+  "npm install --legacy-peer-deps",
+  "cd backend && mvn dependency:go-offline -B"
 ]
-noCache = true
 
 [phases.build]
 cmds = [
-  "echo '=== Building frontend ==='",
-  "echo \"Build time: $(date)\" > build-version.txt",
   "rm -rf dist backend/src/main/resources/static/assets backend/src/main/resources/static/index.html",
   "npm run build",
-  "ls -la dist/",
   "cp -r dist/* backend/src/main/resources/static/",
-  "ls -la backend/src/main/resources/static/",
-  "echo '=== Building backend ==='",
-  "cd backend && mvn clean package -DskipTests -B",
-  "ls -la backend/target/*.jar",
-  "echo '=== Build complete ==='"
+  "cd backend && mvn clean package -DskipTests -B"
 ]
-noCache = true
 
 [start]
 cmd = "java -jar backend/target/ai-chat-backend-1.0.0.jar"
