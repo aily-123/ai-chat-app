@@ -1,7 +1,16 @@
 server:
   port: ${PORT:8080}
+  error:
+    whitelabel:
+      enabled: false
 
 spring:
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: true
+
   # 默认使用 H2 开发环境（无需安装 MySQL，数据存储在文件）
   # 生产环境通过 DB_PATH 环境变量指定持久化路径（如 Railway Volume）
   # 切换到 MySQL 时取消注释下方配置，注释掉 H2 配置
