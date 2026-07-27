@@ -1,7 +1,9 @@
 package com.aichat.service;
 
 import com.aichat.entity.CharacterEntity;
+import com.aichat.entity.ConversationEntity;
 import com.aichat.repository.CharacterRepository;
+import com.aichat.repository.ConversationRepository;
 import com.aichat.security.UserContext;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +15,11 @@ import java.util.UUID;
 public class CharacterService {
 
     private final CharacterRepository characterRepository;
+    private final ConversationRepository conversationRepository;
 
-    public CharacterService(CharacterRepository characterRepository) {
+    public CharacterService(CharacterRepository characterRepository, ConversationRepository conversationRepository) {
         this.characterRepository = characterRepository;
+        this.conversationRepository = conversationRepository;
     }
 
     /** 仅返回当前用户拥有的角色 */
@@ -54,7 +58,21 @@ public class CharacterService {
             if (updates.getBackgroundOpacity() != null) existing.setBackgroundOpacity(updates.getBackgroundOpacity());
             if (updates.getBackgroundFilter() != null) existing.setBackgroundFilter(updates.getBackgroundFilter());
             if (updates.getBackgroundAnimation() != null) existing.setBackgroundAnimation(updates.getBackgroundAnimation());
-            if (updates.getModel() != null) existing.setModel(updates.getModel());
+            String oldModel = existing.getModel();
+            String newModel = updates.getModel();
+            if (newModel != null) {
+                existing.setModel(newModel);
+                // 如果角色专属模型发生变化，同步更新所有关联对话的模型
+                if (!newModel.equals(oldModel)) {
+                    String userId = UserContext.require();
+                    List<ConversationEntity> related = conversationRepository.findByUserIdAndCharacterId(userId, id);
+                    for (ConversationEntity conv : related) {
+                        conv.setModel(newModel);
+                        conv.setUpdatedAt(System.currentTimeMillis());
+                    }
+                    conversationRepository.saveAll(related);
+                }
+            }
             existing.setUpdatedAt(System.currentTimeMillis());
             return characterRepository.save(existing);
         });

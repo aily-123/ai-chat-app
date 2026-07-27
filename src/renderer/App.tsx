@@ -45,6 +45,12 @@ const App: React.FC = () => {
   const { settings, loaded: settingsLoaded, load: loadSettings, update: updateSettings } = useSettingsStore();
   const { characters, loadCharacters } = useCharacterStore();
 
+  // 在角色管理面板保存角色后，需要刷新对话列表以同步角色模型变更
+  const handleCharacterPanelClose = useCallback(() => {
+    setShowCharacters(false);
+    loadConversations();
+  }, [loadConversations]);
+
   // 当前对话对象
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
   const activeCharacter = activeConversation?.characterId
@@ -157,7 +163,9 @@ const App: React.FC = () => {
   const handleSend = useCallback(
     (content: string, options?: { parentMessageId?: string | null; branchMode?: boolean }) => {
       if (!activeConversationId) {
-        createConversation({ model: settings.model || 'gpt-4o' }).then((conv) => {
+        // 没有选中对话时，优先使用当前角色的专属模型创建新对话
+        const model = activeCharacter?.model || settings.model || 'gpt-4o';
+        createConversation({ model, characterId: activeCharacter?.id }).then((conv) => {
           selectConversation(conv.id).then(() => {
             setTimeout(() => sendMessage(content, options), 100);
           });
@@ -166,7 +174,7 @@ const App: React.FC = () => {
         sendMessage(content, options);
       }
     },
-    [activeConversationId, createConversation, selectConversation, sendMessage, settings.model]
+    [activeConversationId, activeCharacter, createConversation, selectConversation, sendMessage, settings.model]
   );
 
   // ===== 路由逻辑 =====
@@ -310,7 +318,7 @@ const App: React.FC = () => {
 
       {showCharacters && (
         <CharacterPanel
-          onClose={() => setShowCharacters(false)}
+          onClose={handleCharacterPanelClose}
           onStartChat={async (characterId) => {
             const conv = await handleCreate(characterId);
             setShowCharacters(false);
